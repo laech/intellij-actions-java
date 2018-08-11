@@ -1,0 +1,41 @@
+<idea-plugin>
+    <id>com.gitlab.lae.intellij.actions</id>
+    <name>intellij-actions</name>
+    <version>0.1</version>
+    <vendor email="dummy" url="dummy">dummy</vendor>
+
+    <description><![CDATA[
+      Sample plugin.<br>
+    ]]></description>
+
+    <change-notes><![CDATA[
+      Release 0.1: Initial release.<br>
+    ]]>
+    </change-notes>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="2018.1"/>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+
+    <extensions defaultExtensionNs="com.intellij">
+    </extensions>
+
+    <actions>
+        <action id="com.gitlab.lae.intellij.actions.UpcaseNextWord" class="com.gitlab.lae.intellij.actions.UpcaseNextWord"
+                text="Upcase Next Word" description="Upcase Next Word"/>
+        <action id="com.gitlab.lae.intellij.actions.DowncaseNextWord" class="com.gitlab.lae.intellij.actions.DowncaseNextWord"
+                text="Downcase Next Word" description="Downcase Next Word"/>
+        <action id="com.gitlab.lae.intellij.actions.DowncasePreviousWord"
+                class="com.gitlab.lae.intellij.actions.DowncasePreviousWord" text="Downcase Previous Word"
+                description="Downcase Previous Word"/>
+        <action id="com.gitlab.lae.intellij.actions.UpcasePreviousWord"
+                class="com.gitlab.lae.intellij.actions.UpcasePreviousWord" text="Upcase Previous Word"
+                description="Upcase Previous Word"/>
+    </actions>
+
+</idea-plugin>
