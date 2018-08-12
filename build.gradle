@@ -17,4 +17,5 @@ dependencies {
 intellij {
     version '2018.1'
     pluginName 'intellij-actions'
+    updateSinceUntilBuild false
 }
