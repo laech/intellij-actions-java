@@ -21,11 +21,20 @@
     <extensions defaultExtensionNs="com.intellij">
     </extensions>
 
-    <application-components>
-        <component>
-            <implementation-class>com.gitlab.lae.intellij.actions.Component
-            </implementation-class>
-        </component>
-    </application-components>
+    <actions>
+
+        <action id="com.gitlab.lae.intellij.actions.UpcaseRegionOrToWordEnd"
+                class="com.gitlab.lae.intellij.actions.UpcaseRegionOrToWordEnd"
+                text="Upcase Region or to Word End"/>
+
+        <action id="com.gitlab.lae.intellij.actions.DowncaseRegionOrToWordEnd"
+                class="com.gitlab.lae.intellij.actions.DowncaseRegionOrToWordEnd"
+                text="Downcase Region or to Word End"/>
+
+        <action id="com.gitlab.lae.intellij.actions.CapitalizeRegionOrToWordEnd"
+                class="com.gitlab.lae.intellij.actions.CapitalizeRegionOrToWordEnd"
+                text="Capitalized Region or to Word End"/>
+
+    </actions>
 
 </idea-plugin>
