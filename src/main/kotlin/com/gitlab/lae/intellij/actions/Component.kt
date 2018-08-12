@@ -1,7 +1,6 @@
 package com.gitlab.lae.intellij.actions
 
 import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.components.ApplicationComponent
 
 class Component : ApplicationComponent {
@@ -13,6 +12,6 @@ class Component : ApplicationComponent {
     }
 }
 
-private fun ActionManager.register(action: AnAction) {
-    registerAction(action.javaClass.name, action)
+private fun ActionManager.register(action: TextAction) {
+    registerAction(action.id, action)
 }
