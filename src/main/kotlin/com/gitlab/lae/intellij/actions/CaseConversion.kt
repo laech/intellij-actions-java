@@ -39,7 +39,8 @@ private fun toCap(str: String): String {
         if (builder == null) {
             builder = StringBuffer(str.length)
         }
-        matcher.appendReplacement(builder, matcher.group().capitalize())
+        val replacement = matcher.group().toLowerCase().capitalize()
+        matcher.appendReplacement(builder, replacement)
     }
     return when (builder) {
         null -> str
@@ -64,9 +65,12 @@ private fun region(f: (String) -> String): Edit = g@{ editor, caret, _ ->
     caret.setSelection(start, start + replacement.length)
 }
 
-private fun move(id: String, f: (String) -> String): Edit = { editor, caret, ctx ->
+private fun move(id: String, f: (String) -> String): Edit = g@{ editor, caret, ctx ->
     caret.removeSelection()
     val (start, end) = moveAndGetRegion(id, editor, caret, ctx)
+    if (start == end) {
+        return@g
+    }
     val doc = editor.document
     val replacement = f(doc.getText(TextRange(start, end)))
     doc.replaceString(start, end, replacement)
@@ -87,8 +91,8 @@ private fun moveAndGetRegion(
     }
 
     val offset1 = caret.offset
-    var offset2: Int
-    while (true) {
+    var offset2: Int = offset1
+    while (offset2 < editor.document.textLength) {
         offset2 = executeMoveAction()
         if (editor.document.charsSequence
                         .subSequence(min(offset1, offset2), max(offset1, offset2))
