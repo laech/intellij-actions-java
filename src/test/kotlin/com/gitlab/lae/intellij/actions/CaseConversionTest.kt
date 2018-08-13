@@ -53,6 +53,7 @@ class CaseConversionTest : LightPlatformCodeInsightFixtureTestCase() {
     }
 
     fun test_capitalizeRegionOrToWordEnd_toWordEnd() {
+        test("Hello", "Hello", 0, capitalizeRegionOrToWordEnd)
         test("HELLO WORLD", "Hello WORLD", 0, capitalizeRegionOrToWordEnd)
         test("HELLO WORLD", "Hello World", 0, capitalizeRegionOrToWordEnd, 2)
         test("hello-world", "hEllo-world", 1, capitalizeRegionOrToWordEnd)
