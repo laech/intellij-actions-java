@@ -5,8 +5,6 @@ import com.intellij.openapi.actionSystem.IdeActions.ACTION_EDITOR_NEXT_WORD
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
-import com.intellij.openapi.editor.actionSystem.EditorWriteActionHandler
-import com.intellij.openapi.editor.actions.TextComponentEditorAction
 import com.intellij.openapi.util.TextRange
 import java.lang.Character.isLowerCase
 import java.lang.Character.isUpperCase
@@ -16,9 +14,9 @@ import kotlin.math.min
 import kotlin.text.toLowerCase
 import kotlin.text.toUpperCase
 
-class UpcaseRegionOrToWordEnd : TextAction(upcaseRegionOrToWordEnd)
-class DowncaseRegionOrToWordEnd : TextAction(downcaseRegionOrToWordEnd)
-class CapitalizeRegionOrToWordEnd : TextAction(capitalizeRegionOrToWordEnd)
+class UpcaseRegionOrToWordEnd : TextAction(true, upcaseRegionOrToWordEnd)
+class DowncaseRegionOrToWordEnd : TextAction(true, downcaseRegionOrToWordEnd)
+class CapitalizeRegionOrToWordEnd : TextAction(true, capitalizeRegionOrToWordEnd)
 
 private val upcaseRegion = region(String::toUpperCase)
 private val downcaseRegion = region(String::toLowerCase)
@@ -31,17 +29,6 @@ private val capitalizeToWordEnd = move(ACTION_EDITOR_NEXT_WORD, ::toCap)
 private val upcaseRegionOrToWordEnd = regionOr(upcaseRegion, upcaseToWordEnd)
 private val downcaseRegionOrToWordEnd = regionOr(downcaseRegion, downcaseToWordEnd)
 private val capitalizeRegionOrToWordEnd = regionOr(capitalizeRegion, capitalizeToWordEnd)
-
-open class TextAction(f: Edit) : TextComponentEditorAction(f.toHandler())
-
-private typealias Edit = (Editor, Caret, DataContext?) -> Unit
-
-private fun Edit.toHandler() = object : EditorWriteActionHandler(true) {
-    override fun executeWriteAction(editor: Editor, caret: Caret?, ctx: DataContext?) {
-        caret ?: return
-        invoke(editor, caret, ctx)
-    }
-}
 
 private val wordPattern = Pattern.compile("\\w+")
 
