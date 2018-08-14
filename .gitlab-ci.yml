@@ -1,5 +1,0 @@
-image: gradle:alpine
-
-build:
-  stage: build
-  script: ./gradlew clean build
