@@ -3,4 +3,3 @@
 *.ipr
 *.iws
 /build
-/gradle.properties
