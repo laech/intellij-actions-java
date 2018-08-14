@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.gitlab.lae.intellij.actions'
-version '0.1-SNAPSHOT'
+version '0.1'
 
 repositories {
     mavenCentral()
@@ -18,6 +18,11 @@ intellij {
     version '2018.1'
     pluginName 'intellij-actions'
     updateSinceUntilBuild false
+}
+
+publishPlugin {
+    username intellijPublishUsername
+    password intellijPublishPassword
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
