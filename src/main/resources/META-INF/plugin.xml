@@ -2,6 +2,8 @@
     <id>com.gitlab.lae.intellij.actions</id>
     <name>Actions</name>
     <version>0.1</version>
+    <vendor>Lae</vendor>
+    <description>Editor actions.</description>
 
     <!-- http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html -->
     <idea-version since-build="181"/>
