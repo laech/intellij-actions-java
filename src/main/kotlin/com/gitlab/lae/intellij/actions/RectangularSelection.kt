@@ -12,27 +12,33 @@ class CreateRectangularSelectionFromMultiLineSelection
         return@g
     }
 
-    val start = caret.selectionStartPosition
-    val end = caret.selectionEndPosition
-    if (start.line == end.line) {
+    val startOffset = caret.selectionStart
+    val endOffset = caret.selectionEnd
+
+    val doc = editor.document
+    val startLine = doc.getLineNumber(startOffset)
+    val endLine = doc.getLineNumber(endOffset)
+    if (startLine == endLine) {
         return@g
     }
 
+    val startColumn = startOffset - doc.getLineStartOffset(startLine)
+    val endColumn = endOffset - doc.getLineStartOffset(endLine)
+
     fun hasEnoughColumns(line: Int): Boolean {
-        val doc = editor.document
         val columns = doc.getLineEndOffset(line) - doc.getLineStartOffset(line)
-        return start.column < columns || end.column < columns
+        return startColumn < columns || endColumn < columns
     }
 
     fun toSelection(line: Int): CaretState {
-        val selectionStart = LogicalPosition(line, start.column)
-        val selectionEnd = LogicalPosition(line, end.column)
+        val selectionStart = LogicalPosition(line, startColumn)
+        val selectionEnd = LogicalPosition(line, endColumn)
         return CaretState(selectionStart, selectionStart, selectionEnd)
     }
 
     caret.removeSelection()
     caret.caretModel.caretsAndSelections = IntStream
-            .rangeClosed(start.line, end.line)
+            .rangeClosed(startLine, endLine)
             .filter(::hasEnoughColumns)
             .mapToObj(::toSelection)
             .collect(toList())
