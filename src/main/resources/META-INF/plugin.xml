@@ -2,7 +2,7 @@
     <id>com.gitlab.lae.intellij.actions</id>
     <name>Actions</name>
     <version>0</version>
-    <vendor>Lae</vendor>
+    <vendor url="https://gitlab.com/lae/intellij-actions">Lae</vendor>
     <description><![CDATA[
     Case conversion:
     <ul>
@@ -21,6 +21,14 @@
 
     <!-- http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
+
+    <change-notes><![CDATA[
+    0.1.1
+    <ul>
+        <li>Fix rectangular selection not working properly when editor has folded regions.</li>
+    </ul>
+    ]]>
+    </change-notes>
 
     <extensions defaultExtensionNs="com.intellij">
     </extensions>
