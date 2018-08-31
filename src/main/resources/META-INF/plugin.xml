@@ -5,15 +5,16 @@
     <vendor url="https://gitlab.com/lae/intellij-actions">Lae</vendor>
     <description><![CDATA[
     Case conversion:
-    <ul>
-        <li>Upcase Region or to Word End</li>
-        <li>Downcase Region or to Word End</li>
-        <li>Capitalize Region or to Word End</li>
-    </ul>
+    <dl>
+        <dt>Upcase Region or to Word End</dt>
+        <dt>Downcase Region or to Word End</dt>
+        <dt>Capitalize Region or to Word End</dt>
+    </dl>
     Rectangular selection:
-    <ul>
-        <li>Create Rectangular Selection from Multiline Selection</li>
-    </ul>
+    <dl>
+        <dt>Rectangle Create<dt>
+        <dd>Create a rectangular selection between the start and end position of the current multiline selection</dd>
+    </dl>
     ]]></description>
 
     <!-- http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html -->
@@ -23,9 +24,13 @@
     <depends>com.intellij.modules.platform</depends>
 
     <change-notes><![CDATA[
+    0.2
+    <ul>
+        <li>Fix Rectangle Create not working properly with multiple cursors.</li>
+    </ul>
     0.1.1
     <ul>
-        <li>Fix rectangular selection not working properly when editor has folded regions.</li>
+        <li>Fix Rectangle Create not working properly when editor has folded regions.</li>
     </ul>
     ]]>
     </change-notes>
@@ -47,9 +52,9 @@
                 class="com.gitlab.lae.intellij.actions.CapitalizeRegionOrToWordEnd"
                 text="Capitalized Region or to Word End"/>
 
-        <action id="com.gitlab.lae.intellij.actions.CreateRectangularSelectionFromMultiLineSelection"
+        <action id="com.gitlab.lae.intellij.actions.RectangleCreate"
                 class="com.gitlab.lae.intellij.actions.RectangleCreate"
-                text="Create Rectangular Selection from Multiline Selection"
+                text="Rectangle Create"
                 description="Create a rectangular selection between the start and end position of the current multiline selection"/>
     </actions>
 
