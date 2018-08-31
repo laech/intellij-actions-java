@@ -48,7 +48,7 @@
                 text="Capitalized Region or to Word End"/>
 
         <action id="com.gitlab.lae.intellij.actions.CreateRectangularSelectionFromMultiLineSelection"
-                class="com.gitlab.lae.intellij.actions.CreateRectangularSelectionFromMultiLineSelection"
+                class="com.gitlab.lae.intellij.actions.RectangleCreate"
                 text="Create Rectangular Selection from Multiline Selection"
                 description="Create a rectangular selection between the start and end position of the current multiline selection"/>
     </actions>

@@ -5,25 +5,39 @@ import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.fileTypes.FileTypes.PLAIN_TEXT
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase
 
-class RectangularSelectionTest
+class RectangleCreateTest
     : LightPlatformCodeInsightFixtureTestCase() {
 
-    fun test_createRectangularSelectionFromMultiLineSelection() {
-
-        test("hello", 1, 2, listOf(
+    fun `test single line selection remains unchanged`() {
+        test("hello", listOf(
+                CaretState(
+                        LogicalPosition(0, 1),
+                        LogicalPosition(0, 1),
+                        LogicalPosition(0, 2)
+                )
+        ), listOf(
                 CaretState(
                         LogicalPosition(0, 1),
                         LogicalPosition(0, 1, true),
                         LogicalPosition(0, 2)
                 )
         ))
+    }
+
+    fun `test selects content in rectangle`() {
 
         // h[e]llo
         // w[o]rld
         test("""
             hello
             world
-        """.trimIndent(), 1, 8, listOf(
+        """.trimIndent(), listOf(
+                CaretState(
+                        LogicalPosition(0, 1),
+                        LogicalPosition(0, 1),
+                        LogicalPosition(1, 2)
+                )
+        ), listOf(
                 CaretState(
                         LogicalPosition(0, 1),
                         LogicalPosition(0, 1, true),
@@ -35,6 +49,9 @@ class RectangularSelectionTest
                         LogicalPosition(1, 2)
                 )
         ))
+    }
+
+    fun `test selects short line in middle of rectangle`() {
 
         // h[ell]o
         // a[a]
@@ -43,7 +60,13 @@ class RectangularSelectionTest
             hello
             aa
             world
-        """.trimIndent(), 1, 13, listOf(
+        """.trimIndent(), listOf(
+                CaretState(
+                        LogicalPosition(0, 1),
+                        LogicalPosition(0, 1),
+                        LogicalPosition(2, 4)
+                )
+        ), listOf(
                 CaretState(
                         LogicalPosition(0, 1),
                         LogicalPosition(0, 1, true),
@@ -60,6 +83,9 @@ class RectangularSelectionTest
                         LogicalPosition(2, 4)
                 )
         ))
+    }
+
+    fun `test skips line if line has no content in rectangle`() {
 
         // h[ell]o
         // a
@@ -68,7 +94,13 @@ class RectangularSelectionTest
             hello
             a
             world
-        """.trimIndent(), 1, 12, listOf(
+        """.trimIndent(), listOf(
+                CaretState(
+                        LogicalPosition(0, 1),
+                        LogicalPosition(0, 1),
+                        LogicalPosition(2, 4)
+                )
+        ), listOf(
                 CaretState(
                         LogicalPosition(0, 1),
                         LogicalPosition(0, 1, true),
@@ -81,6 +113,10 @@ class RectangularSelectionTest
                 )
         ))
 
+    }
+
+    fun `test negative selection`() {
+
         // h[ell]o
         // a
         // w[orl]d
@@ -88,7 +124,13 @@ class RectangularSelectionTest
             hello
             a
             world
-        """.trimIndent(), 4, 9, listOf(
+        """.trimIndent(), listOf(
+                CaretState(
+                        LogicalPosition(0, 4),
+                        LogicalPosition(0, 4),
+                        LogicalPosition(2, 1)
+                )
+        ), listOf(
                 CaretState(
                         LogicalPosition(0, 4),
                         LogicalPosition(0, 1),
@@ -102,16 +144,54 @@ class RectangularSelectionTest
         ))
     }
 
+    fun `test works with multiple cursors`() {
+        test("""
+            hello world
+            hi how
+            are you today
+        """.trimIndent(), listOf(
+                CaretState(
+                        LogicalPosition(0, 1),
+                        LogicalPosition(0, 1),
+                        LogicalPosition(1, 3)
+                ),
+                CaretState(
+                        LogicalPosition(1, 5),
+                        LogicalPosition(1, 5),
+                        LogicalPosition(2, 9)
+                )
+        ), listOf(
+                CaretState(
+                        LogicalPosition(0, 1),
+                        LogicalPosition(0, 1),
+                        LogicalPosition(0, 3)
+                ),
+                CaretState(
+                        LogicalPosition(1, 1),
+                        LogicalPosition(1, 1),
+                        LogicalPosition(1, 3)
+                ),
+                CaretState(
+                        LogicalPosition(1, 5),
+                        LogicalPosition(1, 5),
+                        LogicalPosition(1, 6)
+                ),
+                CaretState(
+                        LogicalPosition(2, 5),
+                        LogicalPosition(2, 5),
+                        LogicalPosition(2, 9)
+                )
+        ))
+    }
+
     private fun test(
             text: String,
-            selectionStart: Int,
-            selectionEnd: Int,
+            initialSelections: List<CaretState>,
             expectedSelections: List<CaretState>
     ) {
         myFixture.configureByText(PLAIN_TEXT, text)
         val caretModel = myFixture.editor.caretModel
-        caretModel.moveToOffset(selectionStart)
-        caretModel.primaryCaret.setSelection(selectionStart, selectionEnd)
+        caretModel.caretsAndSelections = initialSelections
         myFixture.performEditorAction("com.gitlab.lae.intellij.actions.CreateRectangularSelectionFromMultiLineSelection")
         assertEquals(
                 positions(expectedSelections),

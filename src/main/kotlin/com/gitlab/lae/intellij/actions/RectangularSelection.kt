@@ -1,45 +1,47 @@
 package com.gitlab.lae.intellij.actions
 
-import com.intellij.openapi.editor.CaretState
-import com.intellij.openapi.editor.LogicalPosition
-import java.util.stream.Collectors.toList
-import java.util.stream.IntStream
+import com.intellij.openapi.actionSystem.DataContext
+import com.intellij.openapi.editor.*
+import com.intellij.openapi.editor.actionSystem.EditorActionHandler
+import com.intellij.openapi.editor.actions.TextComponentEditorAction
 
-class CreateRectangularSelectionFromMultiLineSelection
-    : TextAction(false, g@{ editor, caret, _ ->
+class RectangleCreate
+    : TextComponentEditorAction(object : EditorActionHandler(false) {
 
-    if (!caret.caretModel.supportsMultipleCarets()) {
-        return@g
+    override fun doExecute(editor: Editor, caret: Caret?, ctx: DataContext?) {
+
+        val caretModel = editor.caretModel
+        if (!caretModel.supportsMultipleCarets()) {
+            return
+        }
+
+        caretModel.caretsAndSelections = caretModel.caretsAndSelections
+                .asSequence()
+                .flatMap { it.toRectangle(editor.document) }
+                .toList()
     }
+})
 
-    val startOffset = caret.selectionStart
-    val endOffset = caret.selectionEnd
+private fun CaretState.toRectangle(doc: Document): Sequence<CaretState> {
 
-    val doc = editor.document
-    val startLine = doc.getLineNumber(startOffset)
-    val endLine = doc.getLineNumber(endOffset)
-    if (startLine == endLine) {
-        return@g
+    val selectionStart = selectionStart ?: return emptySequence()
+    val selectionEnd = selectionEnd ?: return emptySequence()
+    if (selectionEnd.line == selectionStart.line) {
+        return sequenceOf(this)
     }
-
-    val startColumn = startOffset - doc.getLineStartOffset(startLine)
-    val endColumn = endOffset - doc.getLineStartOffset(endLine)
 
     fun hasEnoughColumns(line: Int): Boolean {
         val columns = doc.getLineEndOffset(line) - doc.getLineStartOffset(line)
-        return startColumn < columns || endColumn < columns
+        return selectionStart.column < columns || selectionEnd.column < columns
     }
 
     fun toSelection(line: Int): CaretState {
-        val selectionStart = LogicalPosition(line, startColumn)
-        val selectionEnd = LogicalPosition(line, endColumn)
-        return CaretState(selectionStart, selectionStart, selectionEnd)
+        val lineSelectionStart = LogicalPosition(line, selectionStart.column)
+        val lineSelectionEnd = LogicalPosition(line, selectionEnd.column)
+        return CaretState(lineSelectionStart, lineSelectionStart, lineSelectionEnd)
     }
 
-    caret.removeSelection()
-    caret.caretModel.caretsAndSelections = IntStream
-            .rangeClosed(startLine, endLine)
+    return IntRange(selectionStart.line, selectionEnd.line).asSequence()
             .filter(::hasEnoughColumns)
-            .mapToObj(::toSelection)
-            .collect(toList())
-})
+            .map(::toSelection)
+}
