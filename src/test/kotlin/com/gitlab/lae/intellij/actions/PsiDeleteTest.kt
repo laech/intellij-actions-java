@@ -148,6 +148,44 @@ class PsiDeleteTest : LightPlatformCodeInsightFixtureTestCase() {
         """.trimIndent(), LogicalPosition(1, 13))
     }
 
+    fun `test delete complete argument list`() {
+        test("""
+            class Main {
+              void test(int a, int b, int c) {}
+            }
+        """.trimIndent(), """
+            class Main {
+              void test() {}
+            }
+        """.trimIndent(), LogicalPosition(1, 12))
+    }
+
+    fun `test delete partial argument list`() {
+        test("""
+            class Main {
+              void test(int a, int b, int c) {}
+            }
+        """.trimIndent(), """
+            class Main {
+              void test(int ) {}
+            }
+        """.trimIndent(), LogicalPosition(1, 16))
+    }
+
+    fun `test delete empty argument list delete next block`() {
+        test("""
+            class Main {
+              void test() {
+                int i = 0;
+              }
+            }
+        """.trimIndent(), """
+            class Main {
+              void test(
+            }
+        """.trimIndent(), LogicalPosition(1, 12))
+    }
+
     fun `test delete complete constructor`() {
         test("""
             class Main {
@@ -215,7 +253,8 @@ class PsiDeleteTest : LightPlatformCodeInsightFixtureTestCase() {
     fun `test delete complete field`() {
         test("""
             class Main {
-              public static int test = 1;
+              public static int
+                test = 1;
             }
         """.trimIndent(), """
             class Main {
@@ -227,7 +266,8 @@ class PsiDeleteTest : LightPlatformCodeInsightFixtureTestCase() {
     fun `test delete partial field`() {
         test("""
             class Main {
-              public static int test = 1;
+              public static int
+                test = 1;
             }
         """.trimIndent(), """
             class Main {
