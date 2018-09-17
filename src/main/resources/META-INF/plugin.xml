@@ -16,7 +16,7 @@
     </ul>
     Rectangular selection:
     <ul>
-        <li>Create Rectangle: Create a rectangular selection between the start and end position of the current multiline selection<li>
+        <li>Create Rectangle: Create a rectangular selection between the start and end position of the current multiline selection</li>
     </ul>
     Structural editing:
     <ul>
@@ -38,8 +38,8 @@
     0.2
     <ul>
         <li>Fix Rectangle Create not working properly with multiple cursors.</li>
-        <li>Add Kill to Code End</li>
-        <li>Add Use &quot;CamelHumps&quot; Words in Current Editor</li>
+        <li>Add Kill to Code End.</li>
+        <li>Add Use &quot;CamelHumps&quot; Words in Current Editor.</li>
     </ul>
     0.1.1
     <ul>
