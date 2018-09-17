@@ -41,6 +41,7 @@
     <ul>
         <li>Fix Rectangle Create not working properly with multiple cursors.</li>
         <li>Add Kill to Code End</li>
+        <li>Add Use &quot;CamelHumps&quot; Words in Current Editor</li>
     </ul>
     0.1.1
     <ul>
