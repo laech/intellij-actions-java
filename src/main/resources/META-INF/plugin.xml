@@ -4,6 +4,10 @@
     <version>0</version>
     <vendor url="https://gitlab.com/lae/intellij-actions">Lae</vendor>
     <description><![CDATA[
+    You can invoke these actions via IntelliJ's "Find Action" or "Search Everything"
+    functionality, you can also assign keyboard shortcuts to them under
+    Preferences | Keymap | Plug-ins | Actions.
+    <br/>
     Case conversion:
     <dl>
         <dt>Upcase Region or to Word End</dt>
