@@ -24,6 +24,10 @@
         <dt>Kill to Code End (Java)</dt>
         <dd>Kill from caret offset to the end of the code block, statement, method etc.</dd>
     </dl>
+    Misc:
+    <dl>
+        <dt>Use &quot;CamelHumps&quot; Words in Current Editor</dt>
+    </dl>
     ]]></description>
 
     <!-- http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html -->
@@ -70,6 +74,10 @@
         <action id="com.gitlab.lae.intellij.actions.PsiKill"
                 class="com.gitlab.lae.intellij.actions.PsiKill"
                 text="Kill to Code End"/>
+
+        <action class="com.gitlab.lae.intellij.actions.CamelHumpsInCurrentEditor"
+                id="com.gitlab.lae.intellij.actions.CamelHumpsInCurrentEditor"
+                text="Use &quot;CamelHumps&quot; Words in Current Editor"/>
     </actions>
 
 </idea-plugin>
