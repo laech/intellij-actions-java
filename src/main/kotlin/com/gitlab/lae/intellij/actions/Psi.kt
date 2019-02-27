@@ -8,6 +8,7 @@ import com.intellij.openapi.editor.actionSystem.EditorWriteActionHandler
 import com.intellij.openapi.editor.actions.TextComponentEditorAction
 import com.intellij.psi.*
 import com.intellij.psi.util.parentOfType
+import java.lang.Character.isSpaceChar
 
 class PsiKill : TextComponentEditorAction(object : EditorWriteActionHandler(false) {
     override fun executeWriteAction(editor: Editor, caret: Caret?, ctx: DataContext) {
@@ -33,7 +34,13 @@ private fun select(editor: Editor, caret: Caret, file: PsiFile) {
         return
     }
 
-    var element = file.findElementAt(pos.offset(editor))
+    val doc = editor.document
+    val chars = doc.immutableCharSequence
+    val offset = IntRange(caret.offset, doc.textLength)
+            .find { !isSpaceChar(chars[it]) }
+            ?: return
+
+    var element = file.findElementAt(offset)
     if (element == null) {
         selectToLineEnd(editor, caret)
         return
@@ -43,7 +50,10 @@ private fun select(editor: Editor, caret: Caret, file: PsiFile) {
         element = element.nextSibling
     }
 
-    while (element !is PsiStatement && element !is PsiModifierListOwner) {
+    while (element !is PsiStatement
+            && element !is PsiModifierListOwner
+            && element !is PsiComment) {
+
         if (element == null) {
             selectToLineEnd(editor, caret)
             return
@@ -112,6 +122,3 @@ private fun selectToNextLineStart(editor: Editor, caret: Caret) {
     val logicalEndOffset = editor.logicalPositionToOffset(logicalEndPosition)
     caret.setSelection(visualStartPosition, caret.offset, visualEndPosition, logicalEndOffset)
 }
-
-private fun LogicalPosition.offset(editor: Editor) =
-        editor.document.getLineStartOffset(line) + column

@@ -8,6 +8,34 @@ import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCa
 
 class PsiKillTest : LightPlatformCodeInsightFixtureTestCase() {
 
+    fun `test delete single line comment from line start will delete whole line comment`() {
+        test("""
+            class Main {
+                // bob
+                int bob;
+            }
+        """.trimIndent(), """
+            class Main {
+
+                int bob;
+            }
+        """.trimIndent(), LogicalPosition(1, 0))
+    }
+
+    fun `test delete single line comment from middle will delete rest of the line`() {
+        test("""
+            class Main {
+                // bob
+                int bob;
+            }
+        """.trimIndent(), """
+            class Main {
+                // b
+                int bob;
+            }
+        """.trimIndent(), LogicalPosition(1, 8))
+    }
+
     fun `test delete mixed tabs and spaces`() {
         test("""
             class Main {
