@@ -19,60 +19,73 @@ class PsiKill : TextComponentEditorAction(object : EditorWriteActionHandler(fals
 
 private fun selectElementsUnderCarets(editor: Editor, ctx: DataContext) {
     val file = ctx.getData(PSI_FILE) ?: return
-    editor.caretModel.caretsAndSelections =
-            editor.caretModel.caretsAndSelections
-                    .mapNotNull { it.caretPosition }
-                    .map { select(editor, it, file) }
+    editor.caretModel.allCarets.forEach { select(editor, it, file) }
 }
 
-private fun select(editor: Editor, pos: LogicalPosition, file: PsiFile): CaretState {
+private fun select(editor: Editor, caret: Caret, file: PsiFile) {
 
+    val pos = caret.logicalPosition
     if (pos.isAtEndOfLine(editor)) {
         if (!pos.isAtLastLine(editor)) {
-            return pos.selectToNextLineStart()
+            selectToNextLineStart(editor, caret)
+            return
         }
-        return pos.asCaret()
+        return
     }
 
-    val doc = editor.document
     var element = file.findElementAt(pos.offset(editor))
-            ?: return pos.selectToLineEnd(editor)
+    if (element == null) {
+        selectToLineEnd(editor, caret)
+        return
+    }
 
     while (element is PsiWhiteSpace) {
         element = element.nextSibling
     }
 
     while (element !is PsiStatement && element !is PsiModifierListOwner) {
+        if (element == null) {
+            selectToLineEnd(editor, caret)
+            return
+        }
         element = element.parent
         if (element is PsiFile) {
-            return pos.selectToLineEnd(editor)
+            selectToLineEnd(editor, caret)
+            return
         }
     }
 
-    return when (element) {
-        is PsiParameter -> selectList(doc, pos, element, PsiParameterList::getParameters)
-        is PsiTypeParameter -> selectList(doc, pos, element, PsiTypeParameterList::getTypeParameters)
-        else -> pos.selectToElementEnd(editor, element)
+    when (element) {
+        is PsiParameter -> selectList(editor, caret, element, PsiParameterList::getParameters)
+        is PsiTypeParameter -> selectList(editor, caret, element, PsiTypeParameterList::getTypeParameters)
+        else -> selectElement(editor, caret, element)
     }
 }
 
+private fun selectElement(editor: Editor, caret: Caret, element: PsiElement) {
+    val doc = editor.document
+    val endOffset = element.textRange.endOffset
+    val endLine = doc.getLineNumber(endOffset)
+    val endColumn = endOffset - doc.getLineStartOffset(endLine)
+    val logicalEndPosition = LogicalPosition(endLine, endColumn)
+    val visualEndPosition = editor.logicalToVisualPosition(logicalEndPosition)
+    caret.setSelection(caret.visualPosition, caret.offset, visualEndPosition, endOffset)
+}
+
 private inline fun <reified T : PsiElement> selectList(
-        doc: Document,
-        pos: LogicalPosition,
+        editor: Editor,
+        caret: Caret,
         element: PsiElement,
         params: (T) -> Array<out PsiElement>
-): CaretState {
-
-    val list = element.parentOfType<T>()
-            ?: return pos.asCaret()
-
-    val endOffset = params(list).lastOrNull()?.textRange?.endOffset
-            ?: return pos.asCaret()
-
+) {
+    val doc = editor.document
+    val list = element.parentOfType<T>() ?: return
+    val endOffset = params(list).lastOrNull()?.textRange?.endOffset ?: return
     val endLine = doc.getLineNumber(endOffset)
     val endLineColumn = endOffset - doc.getLineStartOffset(endLine)
-
-    return CaretState(pos, pos, LogicalPosition(endLine, endLineColumn))
+    val logicalEndPosition = LogicalPosition(endLine, endLineColumn)
+    val visualEndPosition = editor.logicalToVisualPosition(logicalEndPosition)
+    caret.setSelection(caret.visualPosition, caret.offset, visualEndPosition, endOffset)
 }
 
 private fun LogicalPosition.isAtEndOfLine(editor: Editor) =
@@ -82,23 +95,23 @@ private fun LogicalPosition.isAtEndOfLine(editor: Editor) =
 private fun LogicalPosition.isAtLastLine(editor: Editor) =
         line + 1 >= editor.document.lineCount
 
-private fun LogicalPosition.selectToLineEnd(editor: Editor) =
-        CaretState(this, this, LogicalPosition(line,
-                editor.document.getLineEndOffset(line)))
-
-private fun LogicalPosition.selectToNextLineStart() =
-        CaretState(this, this, LogicalPosition(line + 1, 0))
-
-private fun LogicalPosition.selectToElementEnd(
-        editor: Editor, element: PsiElement
-): CaretState {
-    val endOffset = element.textRange.endOffset
-    val endLine = editor.document.getLineNumber(endOffset)
-    val endColumn = endOffset - editor.document.getLineStartOffset(endLine)
-    return CaretState(this, this, LogicalPosition(endLine, endColumn))
+private fun selectToLineEnd(editor: Editor, caret: Caret) {
+    val visualStartPosition = caret.visualPosition
+    val logicalEndOffset = editor.document.getLineEndOffset(caret.logicalPosition.line)
+    val logicalStartPosition = editor.visualToLogicalPosition(visualStartPosition)
+    val logicalStartLineOffset = editor.document.getLineStartOffset(logicalStartPosition.line)
+    val logicalEndPosition = LogicalPosition(logicalStartPosition.line, logicalEndOffset - logicalStartLineOffset)
+    val visualEndPosition = editor.logicalToVisualPosition(logicalEndPosition)
+    caret.setSelection(visualStartPosition, caret.offset, visualEndPosition, logicalEndOffset)
 }
 
-private fun LogicalPosition.asCaret() = CaretState(this, null, null)
+private fun selectToNextLineStart(editor: Editor, caret: Caret) {
+    val visualStartPosition = caret.visualPosition
+    val visualEndPosition = VisualPosition(visualStartPosition.line + 1, 0)
+    val logicalEndPosition = editor.visualToLogicalPosition(visualEndPosition)
+    val logicalEndOffset = editor.logicalPositionToOffset(logicalEndPosition)
+    caret.setSelection(visualStartPosition, caret.offset, visualEndPosition, logicalEndOffset)
+}
 
 private fun LogicalPosition.offset(editor: Editor) =
         editor.document.getLineStartOffset(line) + column

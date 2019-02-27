@@ -8,6 +8,31 @@ import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCa
 
 class PsiKillTest : LightPlatformCodeInsightFixtureTestCase() {
 
+    fun `test delete mixed tabs and spaces`() {
+        test("""
+            class Main {
+                public void test() {
+                    Collection<String> test1 = null;
+                    Collection<String> test2 = null;
+                    test1.forEach(s -> {
+                        if(test2.contains(s.toUpperCase())){
+            				System.out.println(s);
+            				System.out.println(s);
+                        }
+            		});
+                }
+            }
+        """.trimIndent(), """
+            class Main {
+                public void test() {
+                    Collection<String> test1 = null;
+                    Collection<String> test2 = null;
+
+                }
+            }
+        """.trimIndent(), LogicalPosition(4, 0))
+    }
+
     fun `test delete complete statement`() {
         test("""
             class Main {
