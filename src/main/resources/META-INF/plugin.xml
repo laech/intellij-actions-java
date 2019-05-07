@@ -35,6 +35,10 @@
     <depends>com.intellij.modules.platform</depends>
 
     <change-notes><![CDATA[
+    0.2.2
+    <ul>
+        <li><a href="https://gitlab.com/lae/intellij-actions/issues/6">Kill to Code End should just kill line if PSI classes are not installed.</a></li>
+    <ul>
     0.2.1
     <ul>
         <li>Fix Kill to Code End not handling comment/code structure properly.</li>
