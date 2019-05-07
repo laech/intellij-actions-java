@@ -20,7 +20,14 @@ class PsiKill : TextComponentEditorAction(object : EditorWriteActionHandler(fals
 
 private fun selectElementsUnderCarets(editor: Editor, ctx: DataContext) {
     val file = ctx.getData(PSI_FILE) ?: return
-    editor.caretModel.allCarets.forEach { select(editor, it, file) }
+    editor.caretModel.allCarets.forEach {
+        try {
+            select(editor, it, file)
+        } catch (e: NoClassDefFoundError) {
+            // If no PSI classes are installed, fallback to kill line
+            selectToLineEnd(editor, it)
+        }
+    }
 }
 
 private fun select(editor: Editor, caret: Caret, file: PsiFile) {
