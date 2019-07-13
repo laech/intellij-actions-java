@@ -33,7 +33,7 @@ interface Edit {
                     @Nullable Caret caret,
                     @Nullable DataContext context
             ) {
-                if (caret != null) {
+                if (caret != null && caret.isValid()) {
                     edit(editor, caret, context);
                 }
             }
@@ -48,7 +48,7 @@ interface Edit {
                     @Nullable Caret caret,
                     @Nullable DataContext context
             ) {
-                if (caret != null) {
+                if (caret != null && caret.isValid()) {
                     edit(editor, caret, context);
                 }
             }
