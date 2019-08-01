@@ -25,7 +25,7 @@ final class NSpace implements Edit {
         Document doc = editor.getDocument();
         CharSequence chars = doc.getImmutableCharSequence();
         int offset = caret.getOffset();
-        if (offset >= chars.length() || !isSpaceOrTab(chars, offset)) {
+        if (offset >= chars.length()) {
             return;
         }
 
