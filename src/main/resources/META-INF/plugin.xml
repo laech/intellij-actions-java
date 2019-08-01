@@ -37,25 +37,40 @@
     <depends>com.intellij.modules.platform</depends>
 
     <change-notes><![CDATA[
+    <br/>
+    0.3.1
+    <ul>
+        <li><a href="https://gitlab.com/lae/intellij-actions/issues/9">Fix No Space / One Space fail to work if cursor is between white space and non white space char</a></li>
+    </ul>
+
+    <br/>
     0.3
     <ul>
         <li>Add <a href="https://gitlab.com/lae/intellij-actions/issues/8">No Space</a></li>
         <li>Add <a href="https://gitlab.com/lae/intellij-actions/issues/7">One Space</a></li>
     </ul>
+
+    <br/>
     0.2.2
     <ul>
         <li><a href="https://gitlab.com/lae/intellij-actions/issues/6">Kill to Code End should just kill line if PSI classes are not installed.</a></li>
     <ul>
+
+    <br/>
     0.2.1
     <ul>
         <li>Fix Kill to Code End not handling comment/code structure properly.</li>
     </ul>
+
+    <br/>
     0.2
     <ul>
         <li>Fix Rectangle Create not working properly with multiple cursors.</li>
         <li>Add Kill to Code End.</li>
         <li>Add Use &quot;CamelHumps&quot; Words in Current Editor.</li>
     </ul>
+
+    <br/>
     0.1.1
     <ul>
         <li>Fix Rectangle Create not working properly when editor has folded regions.</li>
