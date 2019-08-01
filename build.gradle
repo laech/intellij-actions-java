@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'com.gitlab.lae.intellij.actions'
-version '0.3.1'
+version '0.3.2-SNAPSHOT'
 
 repositories {
     mavenCentral()
