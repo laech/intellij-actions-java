@@ -14,16 +14,72 @@ import static java.util.stream.Collectors.toList;
 public final class PsiKillTest
         extends LightPlatformCodeInsightFixtureTestCase {
 
+    public void testDeleteArrayInitializationFromStart() {
+        new Tester()
+                .initialCarets(lineColumn(0, 23))
+                .initialInput("class A { int[] arr = {1, 2, 3}; }")
+                .expectOutput("class A { int[] arr = {}; }");
+    }
+
+    public void testDeletePartialArrayInitialization() {
+        new Tester()
+                .initialCarets(lineColumn(1, 24))
+                .initialInput("class A { int[] arr = {1, 2, 3}; }")
+                .expectOutput("class A { int[] arr = {1}; }");
+    }
+
+    public void testDeleteCompleteArrayInitialization() {
+        new Tester()
+                .initialCarets(lineColumn(1, 22))
+                .initialInput("class A { int[] arr = {1, 2, 3}; }")
+                .expectOutput("class A { int[] arr = ; }");
+    }
+
+    public void testDeleteCompleteIfCondition() {
+        new Tester()
+                .initialCarets(lineColumn(0, 15))
+                .initialInput("class A {{ if (1 == 1) {} }}")
+                .expectOutput("class A {{ if () {} }}");
+    }
+
+    public void testDeletePartialIfCondition() {
+        new Tester()
+                .initialCarets(lineColumn(0, 16))
+                .initialInput("class A {{ if (1 == 1) {} }}")
+                .expectOutput("class A {{ if (1) {} }}");
+    }
+
+    public void testDeleteCompleteStringLiteral() {
+        new Tester()
+                .initialCarets(lineColumn(0, 24))
+                .initialInput("class A { String text = \"hello world\"; }")
+                .expectOutput("class A { String text = ; }");
+    }
+
+    public void testDeletePartialStringLiteral() {
+        new Tester()
+                .initialCarets(lineColumn(0, 27))
+                .initialInput("class A { String text = \"hello world\"; }")
+                .expectOutput("class A { String text = \"he\"; }");
+    }
+
+    public void testDeleteStringLiteralFromStart() {
+        new Tester()
+                .initialCarets(lineColumn(0, 25))
+                .initialInput("class A { String text = \"hello world\"; }")
+                .expectOutput("class A { String text = \"\"; }");
+    }
+
     public void testDeleteSingleLineCommentFromLineStartWillDeleteWholeLineComment() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "    // bob",
                         "    int bob;",
                         "}"
                 )
                 .initialCarets(lineColumn(1, 0))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "",
                         "    int bob;",
@@ -33,14 +89,14 @@ public final class PsiKillTest
 
     public void testDeleteSingleLineCommentFromMiddleWillDeleteRestOfTheLine() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "    // bob",
                         "    int bob;",
                         "}"
                 )
                 .initialCarets(lineColumn(1, 8))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "    // b",
                         "    int bob;",
@@ -50,7 +106,7 @@ public final class PsiKillTest
 
     public void testDeleteMixedTabsAndSpaces() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "    public void test() {",
                         "        Collection<String> test1 = null;",
@@ -65,7 +121,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(4, 0))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "    public void test() {",
                         "        Collection<String> test1 = null;",
@@ -78,7 +134,7 @@ public final class PsiKillTest
 
     public void testDeleteCompleteStatement() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static void main(String[] args) {",
                         "    System",
@@ -89,7 +145,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(2, 0))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  public static void main(String[] args) {",
                         "",
@@ -101,7 +157,7 @@ public final class PsiKillTest
 
     public void testDeletePartialStatement() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static void main(String[] args) {",
                         "    System",
@@ -112,7 +168,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(2, 7))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  public static void main(String[] args) {",
                         "    Sys",
@@ -124,7 +180,7 @@ public final class PsiKillTest
 
     public void testDeleteCompleteTryCatch() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static int test() {",
                         "    try {",
@@ -135,7 +191,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(2, 0))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  public static int test() {",
                         "",
@@ -146,7 +202,7 @@ public final class PsiKillTest
 
     public void testDeletePartialTryCatch() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static int test() {",
                         "    try {",
@@ -157,7 +213,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(2, 6))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  public static int test() {",
                         "    tr",
@@ -168,7 +224,7 @@ public final class PsiKillTest
 
     public void testDeleteCompleteReturnStatement() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static int test() {",
                         "    return",
@@ -177,7 +233,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(2, 0))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  public static int test() {",
                         "",
@@ -188,7 +244,7 @@ public final class PsiKillTest
 
     public void testDeletePartialReturnStatement() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static int test() {",
                         "    return",
@@ -197,7 +253,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(2, 9))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  public static int test() {",
                         "    retur",
@@ -208,7 +264,7 @@ public final class PsiKillTest
 
     public void testDeleteCompleteMethod() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static int test() {",
                         "    return 1;",
@@ -216,7 +272,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(1, 0))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "",
                         "}"
@@ -225,7 +281,7 @@ public final class PsiKillTest
 
     public void testDeletePartialMethod() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static int test() {",
                         "    return",
@@ -234,7 +290,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(1, 13))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  public stat",
                         "}"
@@ -243,13 +299,13 @@ public final class PsiKillTest
 
     public void testDeleteCompleteArgumentList() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  void test(int a, int b, int c) {}",
                         "}"
                 )
                 .initialCarets(lineColumn(1, 12))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  void test() {}",
                         "}"
@@ -258,13 +314,13 @@ public final class PsiKillTest
 
     public void testDeletePartialArgumentList() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  void test(int a, int b, int c) {}",
                         "}"
                 )
                 .initialCarets(lineColumn(1, 16))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  void test(int ) {}",
                         "}"
@@ -273,7 +329,7 @@ public final class PsiKillTest
 
     public void testDeleteEmptyArgumentListDeleteNextBlock() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  void test() {",
                         "    int i = 0;",
@@ -281,7 +337,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(1, 12))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  void test(",
                         "}"
@@ -290,7 +346,7 @@ public final class PsiKillTest
 
     public void testDeleteCompleteConstructor() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  int i;",
                         "  public Main() {",
@@ -299,7 +355,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(2, 0))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  int i;",
                         "",
@@ -309,7 +365,7 @@ public final class PsiKillTest
 
     public void testDeletePartialConstructor() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  int i;",
                         "  public Main() {",
@@ -318,7 +374,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(2, 11))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  int i;",
                         "  public Ma",
@@ -328,7 +384,7 @@ public final class PsiKillTest
 
     public void testDeleteCompleteInitializer() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  int i;",
                         "  {",
@@ -337,7 +393,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(2, 0))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  int i;",
                         "",
@@ -347,7 +403,7 @@ public final class PsiKillTest
 
     public void testDeletePartialInitializer() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  static int i;",
                         "  static {",
@@ -356,7 +412,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(2, 7))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  static int i;",
                         "  stati",
@@ -366,14 +422,14 @@ public final class PsiKillTest
 
     public void testDeleteCompleteField() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static int",
                         "    test = 1;",
                         "}"
                 )
                 .initialCarets(lineColumn(1, 0))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "",
                         "}"
@@ -382,14 +438,14 @@ public final class PsiKillTest
 
     public void testDeletePartialField() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static int",
                         "    test = 1;",
                         "}"
                 )
                 .initialCarets(lineColumn(1, 13))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  public stat",
                         "}"
@@ -398,7 +454,7 @@ public final class PsiKillTest
 
     public void testDeleteCompleteInnerClass() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static class Test {",
                         "    int i;",
@@ -406,7 +462,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(1, 0))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "",
                         "}"
@@ -415,7 +471,7 @@ public final class PsiKillTest
 
     public void testDeletePartialInnerClass() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static class Test {",
                         "    int i;",
@@ -423,7 +479,7 @@ public final class PsiKillTest
                         "}"
                 )
                 .initialCarets(lineColumn(1, 13))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  public stat",
                         "}"
@@ -432,36 +488,36 @@ public final class PsiKillTest
 
     public void testDeleteCompleteClass() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static int test = 1;",
                         "}"
                 )
                 .initialCarets(lineColumn(0, 0))
-                .expectText("");
+                .expectOutput("");
     }
 
     public void testDeletePartialClass() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static int test = 1;",
                         "}"
                 )
                 .initialCarets(lineColumn(0, 8))
-                .expectText("class Ma");
+                .expectOutput("class Ma");
     }
 
     public void testDeleteEmptyLine() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "",
                         "  public static int test = 1;",
                         "}"
                 )
                 .initialCarets(lineColumn(1, 0))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  public static int test = 1;",
                         "}"
@@ -470,13 +526,13 @@ public final class PsiKillTest
 
     public void testDeleteTextEndDoesNothing() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static int test = 1;",
                         "}"
                 )
                 .initialCarets(lineColumn(2, 1))
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  public static int test = 1;",
                         "}"
@@ -485,7 +541,7 @@ public final class PsiKillTest
 
     public void testMultipleCursors() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static int test1 = 1;",
                         "  public static int test2 = 2;",
@@ -496,8 +552,9 @@ public final class PsiKillTest
                 )
                 .initialCarets(
                         lineColumn(1, 0),
-                        lineColumn(3, 0))
-                .expectText(
+                        lineColumn(3, 0)
+                )
+                .expectOutput(
                         "class Main {",
                         "",
                         "  public static int test2 = 2;",
@@ -508,7 +565,7 @@ public final class PsiKillTest
 
     public void testPasteWhatsBeenKilledWillGetBackOriginalText() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static int test() {",
                         "    return 1;",
@@ -517,7 +574,7 @@ public final class PsiKillTest
                 )
                 .initialCarets(lineColumn(1, 0))
                 .doPasteAfterKill()
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  public static int test() {",
                         "    return 1;",
@@ -528,7 +585,7 @@ public final class PsiKillTest
 
     public void testPasteWhatsBeenKilledWithMultipleCursorsWillGetBackOriginalText() {
         new Tester()
-                .initialText(
+                .initialInput(
                         "class Main {",
                         "  public static int test1 = 1;",
                         "  public static int test2 = 2;",
@@ -542,7 +599,7 @@ public final class PsiKillTest
                         lineColumn(3, 0)
                 )
                 .doPasteAfterKill()
-                .expectText(
+                .expectOutput(
                         "class Main {",
                         "  public static int test1 = 1;",
                         "  public static int test2 = 2;",
@@ -567,7 +624,7 @@ public final class PsiKillTest
             return this;
         }
 
-        Tester initialText(String... lines) {
+        Tester initialInput(String... lines) {
             initialText = String.join("\n", lines);
             return this;
         }
@@ -577,7 +634,7 @@ public final class PsiKillTest
             return this;
         }
 
-        void expectText(String... expectedLines) {
+        void expectOutput(String... expectedLines) {
             myFixture.configureByText(JavaFileType.INSTANCE, initialText);
             Editor editor = myFixture.getEditor();
             editor.getCaretModel().setCaretsAndSelections(
@@ -585,7 +642,8 @@ public final class PsiKillTest
                             .map(it -> new CaretState(it, it, it))
                             .collect(toList()));
 
-            myFixture.performEditorAction("com.gitlab.lae.intellij.actions.PsiKill");
+            myFixture.performEditorAction(
+                    "com.gitlab.lae.intellij.actions.PsiKill");
             if (pasteAfterKill) {
                 myFixture.performEditorAction(ACTION_EDITOR_PASTE_SIMPLE);
             }

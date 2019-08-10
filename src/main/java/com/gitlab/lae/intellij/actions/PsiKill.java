@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.editor.*;
 import com.intellij.openapi.editor.actionSystem.EditorWriteActionHandler;
 import com.intellij.openapi.editor.actions.TextComponentEditorAction;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 
 import java.util.OptionalInt;
@@ -91,7 +92,10 @@ public final class PsiKill extends TextComponentEditorAction {
 
         while (!(element instanceof PsiStatement)
                 && !(element instanceof PsiModifierListOwner)
-                && !(element instanceof PsiComment)) {
+                && !(element instanceof PsiComment)
+                && !(element instanceof PsiPolyadicExpression)
+                && !(element instanceof PsiArrayInitializerExpression)
+                && !isStringLiteral(editor, element)) {
 
             if (element == null) {
                 selectToLineEnd(editor, caret);
@@ -107,16 +111,30 @@ public final class PsiKill extends TextComponentEditorAction {
         if (element instanceof PsiParameter) {
             selectList(editor, caret, element,
                     PsiParameterList.class,
-                    PsiParameterList::getParameters);
+                    PsiParameterList::getParameters
+            );
 
         } else if (element instanceof PsiTypeParameter) {
             selectList(editor, caret, element,
                     PsiTypeParameterList.class,
-                    PsiTypeParameterList::getTypeParameters);
+                    PsiTypeParameterList::getTypeParameters
+            );
 
         } else {
             selectElement(editor, caret, element);
         }
+    }
+
+    private static boolean isStringLiteral(Editor editor, PsiElement element) {
+        if (!(element instanceof PsiLiteralExpression)) {
+            return false;
+        }
+        TextRange range = element.getTextRange();
+        int endOffset = range.getEndOffset();
+        return endOffset > 0 &&
+                editor.getDocument()
+                        .getImmutableCharSequence()
+                        .charAt(endOffset - 1) == '"';
     }
 
     private static void selectElement(
@@ -125,7 +143,18 @@ public final class PsiKill extends TextComponentEditorAction {
             PsiElement element
     ) {
         Document doc = editor.getDocument();
-        int endOffset = element.getTextRange().getEndOffset();
+        TextRange range = element.getTextRange();
+        int endOffset = range.getEndOffset();
+
+        if (caret.getOffset() > range.getStartOffset()) {
+            // If inside pair of quotes/braces etc, kill to just before the
+            // end closing char.
+            if (element instanceof PsiArrayInitializerExpression
+                    || isStringLiteral(editor, element)) {
+                endOffset--;
+            }
+        }
+
         int endLine = doc.getLineNumber(endOffset);
         int endColumn = endOffset - doc.getLineStartOffset(endLine);
         caret.setSelection(
@@ -133,7 +162,8 @@ public final class PsiKill extends TextComponentEditorAction {
                 caret.getOffset(),
                 editor.logicalToVisualPosition(
                         new LogicalPosition(endLine, endColumn)),
-                endOffset);
+                endOffset
+        );
     }
 
     private static <T extends PsiElement> void selectList(
@@ -161,7 +191,8 @@ public final class PsiKill extends TextComponentEditorAction {
                 caret.getOffset(),
                 editor.logicalToVisualPosition(
                         new LogicalPosition(endLine, endLineColumn)),
-                endOffset);
+                endOffset
+        );
     }
 
     private static boolean isAtEndOfLine(
@@ -195,12 +226,14 @@ public final class PsiKill extends TextComponentEditorAction {
 
         LogicalPosition logicalEndPosition = new LogicalPosition(
                 logicalStartPosition.line,
-                logicalEndOffset - logicalStartLineOffset);
+                logicalEndOffset - logicalStartLineOffset
+        );
         caret.setSelection(
                 visualStartPosition,
                 caret.getOffset(),
                 editor.logicalToVisualPosition(logicalEndPosition),
-                logicalEndOffset);
+                logicalEndOffset
+        );
     }
 
     private static void selectToNextLineStart(
@@ -223,6 +256,7 @@ public final class PsiKill extends TextComponentEditorAction {
                 visualStartPosition,
                 caret.getOffset(),
                 visualEndPosition,
-                logicalEndOffset);
+                logicalEndOffset
+        );
     }
 }
