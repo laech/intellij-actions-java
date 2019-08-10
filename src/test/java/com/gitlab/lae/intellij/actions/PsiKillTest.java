@@ -6,7 +6,8 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.intellij.openapi.actionSystem.IdeActions.ACTION_EDITOR_PASTE_SIMPLE;
 import static java.util.stream.Collectors.toList;
@@ -16,57 +17,49 @@ public final class PsiKillTest
 
     public void testDeleteArrayInitializationFromStart() {
         new Tester()
-                .initialCarets(lineColumn(0, 23))
-                .initialInput("class A { int[] arr = {1, 2, 3}; }")
+                .initialInput("class A { int[] arr = {|1, 2, 3}; }")
                 .expectOutput("class A { int[] arr = {}; }");
     }
 
     public void testDeletePartialArrayInitialization() {
         new Tester()
-                .initialCarets(lineColumn(1, 24))
-                .initialInput("class A { int[] arr = {1, 2, 3}; }")
+                .initialInput("class A { int[] arr = {1|, 2, 3}; }")
                 .expectOutput("class A { int[] arr = {1}; }");
     }
 
     public void testDeleteCompleteArrayInitialization() {
         new Tester()
-                .initialCarets(lineColumn(1, 22))
-                .initialInput("class A { int[] arr = {1, 2, 3}; }")
+                .initialInput("class A { int[] arr = |{1, 2, 3}; }")
                 .expectOutput("class A { int[] arr = ; }");
     }
 
     public void testDeleteCompleteIfCondition() {
         new Tester()
-                .initialCarets(lineColumn(0, 15))
-                .initialInput("class A {{ if (1 == 1) {} }}")
+                .initialInput("class A {{ if (|1 == 1) {} }}")
                 .expectOutput("class A {{ if () {} }}");
     }
 
     public void testDeletePartialIfCondition() {
         new Tester()
-                .initialCarets(lineColumn(0, 16))
-                .initialInput("class A {{ if (1 == 1) {} }}")
+                .initialInput("class A {{ if (1| == 1) {} }}")
                 .expectOutput("class A {{ if (1) {} }}");
     }
 
     public void testDeleteCompleteStringLiteral() {
         new Tester()
-                .initialCarets(lineColumn(0, 24))
-                .initialInput("class A { String text = \"hello world\"; }")
+                .initialInput("class A { String text = |\"hello world\"; }")
                 .expectOutput("class A { String text = ; }");
     }
 
     public void testDeletePartialStringLiteral() {
         new Tester()
-                .initialCarets(lineColumn(0, 27))
-                .initialInput("class A { String text = \"hello world\"; }")
+                .initialInput("class A { String text = \"he|llo world\"; }")
                 .expectOutput("class A { String text = \"he\"; }");
     }
 
     public void testDeleteStringLiteralFromStart() {
         new Tester()
-                .initialCarets(lineColumn(0, 25))
-                .initialInput("class A { String text = \"hello world\"; }")
+                .initialInput("class A { String text = \"|hello world\"; }")
                 .expectOutput("class A { String text = \"\"; }");
     }
 
@@ -74,11 +67,10 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "    // bob",
+                        "|    // bob",
                         "    int bob;",
                         "}"
                 )
-                .initialCarets(lineColumn(1, 0))
                 .expectOutput(
                         "class Main {",
                         "",
@@ -91,11 +83,10 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "    // bob",
+                        "    // b|ob",
                         "    int bob;",
                         "}"
                 )
-                .initialCarets(lineColumn(1, 8))
                 .expectOutput(
                         "class Main {",
                         "    // b",
@@ -111,7 +102,7 @@ public final class PsiKillTest
                         "    public void test() {",
                         "        Collection<String> test1 = null;",
                         "        Collection<String> test2 = null;",
-                        "        test1.forEach(s -> {",
+                        "|        test1.forEach(s -> {",
                         "            if(test2.contains(s.toUpperCase())){",
                         "				System.out.println(s);",
                         "				System.out.println(s);",
@@ -120,7 +111,6 @@ public final class PsiKillTest
                         "    }",
                         "}"
                 )
-                .initialCarets(lineColumn(4, 0))
                 .expectOutput(
                         "class Main {",
                         "    public void test() {",
@@ -137,14 +127,13 @@ public final class PsiKillTest
                 .initialInput(
                         "class Main {",
                         "  public static void main(String[] args) {",
-                        "    System",
+                        "|    System",
                         "        .out",
                         "        .println();",
                         "    System.exit(0);",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(2, 0))
                 .expectOutput(
                         "class Main {",
                         "  public static void main(String[] args) {",
@@ -160,14 +149,13 @@ public final class PsiKillTest
                 .initialInput(
                         "class Main {",
                         "  public static void main(String[] args) {",
-                        "    System",
+                        "    Sys|tem",
                         "        .out",
                         "        .println();",
                         "    System.exit(0);",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(2, 7))
                 .expectOutput(
                         "class Main {",
                         "  public static void main(String[] args) {",
@@ -183,14 +171,13 @@ public final class PsiKillTest
                 .initialInput(
                         "class Main {",
                         "  public static int test() {",
-                        "    try {",
+                        "|    try {",
                         "      throw new RuntimeException();",
                         "    } catch (RuntimeException e) {",
                         "    }",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(2, 0))
                 .expectOutput(
                         "class Main {",
                         "  public static int test() {",
@@ -205,14 +192,13 @@ public final class PsiKillTest
                 .initialInput(
                         "class Main {",
                         "  public static int test() {",
-                        "    try {",
+                        "    tr|y {",
                         "      throw new RuntimeException();",
                         "    } catch (RuntimeException e) {",
                         "    }",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(2, 6))
                 .expectOutput(
                         "class Main {",
                         "  public static int test() {",
@@ -227,12 +213,11 @@ public final class PsiKillTest
                 .initialInput(
                         "class Main {",
                         "  public static int test() {",
-                        "    return",
+                        "|    return",
                         "        1;",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(2, 0))
                 .expectOutput(
                         "class Main {",
                         "  public static int test() {",
@@ -247,12 +232,11 @@ public final class PsiKillTest
                 .initialInput(
                         "class Main {",
                         "  public static int test() {",
-                        "    return",
+                        "    retur|n",
                         "        1;",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(2, 9))
                 .expectOutput(
                         "class Main {",
                         "  public static int test() {",
@@ -266,12 +250,11 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "  public static int test() {",
+                        "|  public static int test() {",
                         "    return 1;",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(1, 0))
                 .expectOutput(
                         "class Main {",
                         "",
@@ -283,13 +266,12 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "  public static int test() {",
+                        "  public stat|ic int test() {",
                         "    return",
                         "        1;",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(1, 13))
                 .expectOutput(
                         "class Main {",
                         "  public stat",
@@ -301,10 +283,9 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "  void test(int a, int b, int c) {}",
+                        "  void test(|int a, int b, int c) {}",
                         "}"
                 )
-                .initialCarets(lineColumn(1, 12))
                 .expectOutput(
                         "class Main {",
                         "  void test() {}",
@@ -316,10 +297,9 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "  void test(int a, int b, int c) {}",
+                        "  void test(int |a, int b, int c) {}",
                         "}"
                 )
-                .initialCarets(lineColumn(1, 16))
                 .expectOutput(
                         "class Main {",
                         "  void test(int ) {}",
@@ -331,12 +311,11 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "  void test() {",
+                        "  void test(|) {",
                         "    int i = 0;",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(1, 12))
                 .expectOutput(
                         "class Main {",
                         "  void test(",
@@ -349,12 +328,11 @@ public final class PsiKillTest
                 .initialInput(
                         "class Main {",
                         "  int i;",
-                        "  public Main() {",
+                        "|  public Main() {",
                         "    i = 1;",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(2, 0))
                 .expectOutput(
                         "class Main {",
                         "  int i;",
@@ -368,12 +346,11 @@ public final class PsiKillTest
                 .initialInput(
                         "class Main {",
                         "  int i;",
-                        "  public Main() {",
+                        "  public Ma|in() {",
                         "    i = 1;",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(2, 11))
                 .expectOutput(
                         "class Main {",
                         "  int i;",
@@ -387,12 +364,11 @@ public final class PsiKillTest
                 .initialInput(
                         "class Main {",
                         "  int i;",
-                        "  {",
+                        "|  {",
                         "    i = 1;",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(2, 0))
                 .expectOutput(
                         "class Main {",
                         "  int i;",
@@ -406,12 +382,11 @@ public final class PsiKillTest
                 .initialInput(
                         "class Main {",
                         "  static int i;",
-                        "  static {",
+                        "  stati|c {",
                         "    i = 1;",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(2, 7))
                 .expectOutput(
                         "class Main {",
                         "  static int i;",
@@ -424,11 +399,10 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "  public static int",
+                        "|  public static int",
                         "    test = 1;",
                         "}"
                 )
-                .initialCarets(lineColumn(1, 0))
                 .expectOutput(
                         "class Main {",
                         "",
@@ -440,11 +414,10 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "  public static int",
+                        "  public stat|ic int",
                         "    test = 1;",
                         "}"
                 )
-                .initialCarets(lineColumn(1, 13))
                 .expectOutput(
                         "class Main {",
                         "  public stat",
@@ -456,12 +429,11 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "  public static class Test {",
+                        "|  public static class Test {",
                         "    int i;",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(1, 0))
                 .expectOutput(
                         "class Main {",
                         "",
@@ -473,12 +445,11 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "  public static class Test {",
+                        "  public stat|ic class Test {",
                         "    int i;",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(1, 13))
                 .expectOutput(
                         "class Main {",
                         "  public stat",
@@ -489,22 +460,20 @@ public final class PsiKillTest
     public void testDeleteCompleteClass() {
         new Tester()
                 .initialInput(
-                        "class Main {",
+                        "|class Main {",
                         "  public static int test = 1;",
                         "}"
                 )
-                .initialCarets(lineColumn(0, 0))
                 .expectOutput("");
     }
 
     public void testDeletePartialClass() {
         new Tester()
                 .initialInput(
-                        "class Main {",
+                        "class Ma|in {",
                         "  public static int test = 1;",
                         "}"
                 )
-                .initialCarets(lineColumn(0, 8))
                 .expectOutput("class Ma");
     }
 
@@ -512,11 +481,10 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "",
+                        "|",
                         "  public static int test = 1;",
                         "}"
                 )
-                .initialCarets(lineColumn(1, 0))
                 .expectOutput(
                         "class Main {",
                         "  public static int test = 1;",
@@ -529,9 +497,8 @@ public final class PsiKillTest
                 .initialInput(
                         "class Main {",
                         "  public static int test = 1;",
-                        "}"
+                        "}|"
                 )
-                .initialCarets(lineColumn(2, 1))
                 .expectOutput(
                         "class Main {",
                         "  public static int test = 1;",
@@ -543,16 +510,12 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "  public static int test1 = 1;",
+                        "|  public static int test1 = 1;",
                         "  public static int test2 = 2;",
-                        "  public static int test3() {",
+                        "|  public static int test3() {",
                         "    return 3;",
                         "  }",
                         "}"
-                )
-                .initialCarets(
-                        lineColumn(1, 0),
-                        lineColumn(3, 0)
                 )
                 .expectOutput(
                         "class Main {",
@@ -567,12 +530,11 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "  public static int test() {",
+                        "|  public static int test() {",
                         "    return 1;",
                         "  }",
                         "}"
                 )
-                .initialCarets(lineColumn(1, 0))
                 .doPasteAfterKill()
                 .expectOutput(
                         "class Main {",
@@ -587,16 +549,12 @@ public final class PsiKillTest
         new Tester()
                 .initialInput(
                         "class Main {",
-                        "  public static int test1 = 1;",
+                        "|  public static int test1 = 1;",
                         "  public static int test2 = 2;",
-                        "  public static int test3() {",
+                        "|  public static int test3() {",
                         "    return 3;",
                         "  }",
                         "}"
-                )
-                .initialCarets(
-                        lineColumn(1, 0),
-                        lineColumn(3, 0)
                 )
                 .doPasteAfterKill()
                 .expectOutput(
@@ -610,27 +568,30 @@ public final class PsiKillTest
                 );
     }
 
-    private static LogicalPosition lineColumn(int line, int column) {
-        return new LogicalPosition(line, column);
-    }
-
     private final class Tester {
         private boolean pasteAfterKill;
         private String initialText;
-        private LogicalPosition[] initialCarets;
+        private final List<LogicalPosition> initialCarets = new ArrayList<>();
 
         Tester doPasteAfterKill() {
             this.pasteAfterKill = true;
             return this;
         }
 
-        Tester initialInput(String... lines) {
+        Tester initialInput(String... linesWithCursors) {
+            String[] lines = linesWithCursors.clone();
+            for (int i = 0; i < lines.length; i++) {
+                String line = lines[i];
+                for (int j = 0; j > -1 && j < line.length(); ) {
+                    j = line.indexOf('|', j);
+                    if (j > -1) {
+                        line = line.replaceFirst("\\|", "");
+                        initialCarets.add(new LogicalPosition(i, j));
+                    }
+                }
+                lines[i] = line;
+            }
             initialText = String.join("\n", lines);
-            return this;
-        }
-
-        Tester initialCarets(LogicalPosition... positions) {
-            initialCarets = positions;
             return this;
         }
 
@@ -638,7 +599,7 @@ public final class PsiKillTest
             myFixture.configureByText(JavaFileType.INSTANCE, initialText);
             Editor editor = myFixture.getEditor();
             editor.getCaretModel().setCaretsAndSelections(
-                    Arrays.stream(initialCarets)
+                    initialCarets.stream()
                             .map(it -> new CaretState(it, it, it))
                             .collect(toList()));
 
