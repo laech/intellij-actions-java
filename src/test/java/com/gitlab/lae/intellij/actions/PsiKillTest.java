@@ -316,7 +316,11 @@ public final class PsiKillTest
                 );
     }
 
-    public void testDeleteEmptyArgumentListDeleteNextBlock() {
+    public void testArgumentListJustBeforeClosingBracketDoesNothing() {
+        new Tester()
+                .initialInput("class A { void test(int i|) {} }")
+                .expectOutput("class A { void test(int i) {} }");
+
         new Tester()
                 .initialInput(
                         "class Main {",
@@ -327,7 +331,9 @@ public final class PsiKillTest
                 )
                 .expectOutput(
                         "class Main {",
-                        "  void test(",
+                        "  void test() {",
+                        "    int i = 0;",
+                        "  }",
                         "}"
                 );
     }

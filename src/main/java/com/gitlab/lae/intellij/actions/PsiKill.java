@@ -95,6 +95,7 @@ public final class PsiKill extends TextComponentEditorAction {
                 && !(element instanceof PsiComment)
                 && !(element instanceof PsiPolyadicExpression)
                 && !(element instanceof PsiArrayInitializerExpression)
+                && !(element instanceof PsiParameterList)
                 && !isStringLiteral(editor, element)) {
 
             if (element == null) {
@@ -149,8 +150,9 @@ public final class PsiKill extends TextComponentEditorAction {
         if (caret.getOffset() > range.getStartOffset()) {
             // If inside pair of quotes/braces etc, kill to just before the
             // end closing char.
-            if (element instanceof PsiArrayInitializerExpression
-                    || isStringLiteral(editor, element)) {
+            if (isStringLiteral(editor, element)
+                    || element instanceof PsiArrayInitializerExpression
+                    || element instanceof PsiParameterList) {
                 endOffset--;
             }
         }
