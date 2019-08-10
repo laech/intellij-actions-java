@@ -33,6 +33,15 @@ public final class PsiKillTest
                 .expectOutput("class A { int[] arr = ; }");
     }
 
+    public void testDeleteArrayInitializationJustBeforeClosingDoesNothing() {
+        new Tester()
+                .initialInput("class A { int[] arr = {|}; }")
+                .expectOutput("class A { int[] arr = {}; }");
+        new Tester()
+                .initialInput("class A { int[] arr = {1, 2, 3|}; }")
+                .expectOutput("class A { int[] arr = {1, 2, 3}; }");
+    }
+
     public void testDeleteCompleteIfCondition() {
         new Tester()
                 .initialInput("class A {{ if (|1 == 1) {} }}")
