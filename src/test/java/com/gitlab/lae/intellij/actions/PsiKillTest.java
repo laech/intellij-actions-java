@@ -63,6 +63,15 @@ public final class PsiKillTest
                 .expectOutput("class A { String text = \"\"; }");
     }
 
+    public void testDeleteStringJustBeforeEndQuoteDoesNothing() {
+        new Tester()
+                .initialInput("class A { String text = \"|\"; }")
+                .expectOutput("class A { String text = \"\"; }");
+        new Tester()
+                .initialInput("class A { String text = \"abc|\"; }")
+                .expectOutput("class A { String text = \"abc\"; }");
+    }
+
     public void testDeleteSingleLineCommentFromLineStartWillDeleteWholeLineComment() {
         new Tester()
                 .initialInput(
