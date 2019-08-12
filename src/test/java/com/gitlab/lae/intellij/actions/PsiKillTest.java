@@ -15,16 +15,148 @@ import static java.util.stream.Collectors.toList;
 public final class PsiKillTest
         extends LightPlatformCodeInsightFixtureTestCase {
 
-    public void testDeleteArrayInitializationFromStart() {
+    public void testDeleteBracketContentWithoutDeletingClosingBracket() {
         new Tester()
-                .initialInput("class A { int[] arr = {|1, 2, 3}; }")
-                .expectOutput("class A { int[] arr = {}; }");
+                .initialInput("class A { int i = (1| - 1); }")
+                .expectOutput("class A { int i = (1); }");
     }
 
-    public void testDeletePartialArrayInitialization() {
+    public void testDeleteAtEndBracketDoesNothing() {
         new Tester()
-                .initialInput("class A { int[] arr = {1|, 2, 3}; }")
-                .expectOutput("class A { int[] arr = {1}; }");
+                .initialInput("class A { int i = (1|); }")
+                .expectOutput("class A { int i = (1); }");
+    }
+
+    public void testDeleteAtStartBracketOfExpressionDeletesWholeExpression() {
+        new Tester()
+                .initialInput("class A { int i = |(1); }")
+                .expectOutput("class A { int i = ; }");
+    }
+
+    public void testDeleteChar() {
+        new Tester()
+                .initialInput("class A { char a = '|a'; }")
+                .expectOutput("class A { char a = ''; }");
+        new Tester()
+                .initialInput("class A { char a = |'a'; }")
+                .expectOutput("class A { char a = ; }");
+    }
+
+    public void testDeleteCompleteClassBody() {
+        new Tester()
+                .initialInput("class A |{}")
+                .expectOutput("class A ");
+    }
+
+    public void testDeleteJustBeforeClosingBraceInClassDoesNothing() {
+        new Tester()
+                .initialInput("class A {|}")
+                .expectOutput("class A {}");
+        new Tester()
+                .initialInput("class A { int a = 0; |}")
+                .expectOutput("class A { int a = 0; }");
+    }
+
+    public void testDeleteJustBeforeClosingBraceInMethodDoesNothing() {
+        new Tester()
+                .initialInput("class A { void bob() {|} }")
+                .expectOutput("class A { void bob() {} }");
+    }
+
+    public void testDeleteJustBeforeClosingBraceInInitializerDoesNothing() {
+        new Tester()
+                .initialInput("class A {{|}}")
+                .expectOutput("class A {{}}");
+    }
+
+    public void testDeleteJustBeforeClosingBraceInStaticInitializerDoesNothing() {
+        new Tester()
+                .initialInput("class A { static {|} }")
+                .expectOutput("class A { static {} }");
+    }
+
+    public void testDeleteJustBeforeClosingBraceInStatementDoesNothing() {
+        new Tester()
+                .initialInput("class A { void bob() { {|} } }")
+                .expectOutput("class A { void bob() { {} } }");
+    }
+
+    public void testDeleteFirstMethodInvocationParameter() {
+        new Tester()
+                .initialInput("class A {{ bob(|1, 2, 3); }}")
+                .expectOutput("class A {{ bob(2, 3); }}");
+        new Tester()
+                .initialInput("class A {{ bob( |1, 2, 3); }}")
+                .expectOutput("class A {{ bob( 2, 3); }}");
+        new Tester()
+                .initialInput("class A {{ bob(| 1, 2, 3); }}")
+                .expectOutput("class A {{ bob(2, 3); }}");
+    }
+
+    public void testDeleteMiddleMethodInvocationParameter() {
+        new Tester()
+                .initialInput("class A {{ bob(1, |2, 3); }}")
+                .expectOutput("class A {{ bob(1, 3); }}");
+        new Tester()
+                .initialInput("class A {{ bob(1, | 2, 3); }}")
+                .expectOutput("class A {{ bob(1, 3); }}");
+        new Tester()
+                .initialInput("class A {{ bob(1,| 2, 3); }}")
+                .expectOutput("class A {{ bob(1,3); }}");
+    }
+
+    public void testDeleteLastMethodInvocationParameter() {
+        new Tester()
+                .initialInput("class A {{ bob(1, 2|, 3); }}")
+                .expectOutput("class A {{ bob(1, 2); }}");
+        new Tester()
+                .initialInput("class A {{ bob(1, 2 |, 3); }}")
+                .expectOutput("class A {{ bob(1, 2 ); }}");
+        new Tester()
+                .initialInput("class A {{ bob(1, 2,| 3); }}")
+                .expectOutput("class A {{ bob(1, 2,); }}");
+        new Tester()
+                .initialInput("class A {{ bob(1, 2, | 3); }}")
+                .expectOutput("class A {{ bob(1, 2, ); }}");
+    }
+
+    public void testDeleteCompleteMethodInvocationParameterList() {
+        new Tester()
+                .initialInput("class A {{ bob|(1, 2, 3); }}")
+                .expectOutput("class A {{ bob; }}");
+    }
+
+    public void testDeleteMethodInvocationJustBeforeClosingDoesNothing() {
+        new Tester()
+                .initialInput("class A {{ bob(|); }}")
+                .expectOutput("class A {{ bob(); }}");
+        new Tester()
+                .initialInput("class A {{ bob(1, 2, 3|); }}")
+                .expectOutput("class A {{ bob(1, 2, 3); }}");
+    }
+
+    public void testDeleteMethodInvocationWhitespace() {
+        new Tester()
+                .initialInput("class A {{ bob(| ); }}")
+                .expectOutput("class A {{ bob(); }}");
+    }
+
+    public void testDeleteFirstArrayInitializationElement() {
+        new Tester()
+                .initialInput("class A { int[] arr = {|1, 2, 3}; }")
+                .expectOutput("class A { int[] arr = {2, 3}; }");
+    }
+
+    public void testDeleteMiddleArrayInitialization() {
+        new Tester()
+                .initialInput("class A { int[] arr = {1, |2, 3}; }")
+                .expectOutput("class A { int[] arr = {1, 3}; }");
+    }
+
+    public void testDeleteLastArrayInitialization() {
+        new Tester()
+                .initialInput("class A { int[] arr = {1, 2 |, 3}; }")
+                .expectOutput("class A { int[] arr = {1, 2 }; }");
     }
 
     public void testDeleteCompleteArrayInitialization() {
@@ -44,7 +176,7 @@ public final class PsiKillTest
 
     public void testDeleteCompleteIfCondition() {
         new Tester()
-                .initialInput("class A {{ if (|1 == 1) {} }}")
+                .initialInput("class A {{ if (|true) {} }}")
                 .expectOutput("class A {{ if () {} }}");
     }
 
@@ -52,6 +184,36 @@ public final class PsiKillTest
         new Tester()
                 .initialInput("class A {{ if (1| == 1) {} }}")
                 .expectOutput("class A {{ if (1) {} }}");
+    }
+
+    public void testDeleteFirstCompleteIfConditionWithinMultipleConditions() {
+        new Tester()
+                .initialInput("class A {{ if (|1 == 1 && true) {} }}")
+                .expectOutput("class A {{ if (1 && true) {} }}");
+    }
+
+    public void testDeleteLastCompleteIfConditionWithinMultipleConditions() {
+        new Tester()
+                .initialInput("class A {{ if (1 == 1| && true) {} }}")
+                .expectOutput("class A {{ if (1 == 1) {} }}");
+    }
+
+    public void testDeleteMiddleCompleteIfConditionAfterOperatorWithinMultipleConditions() {
+        new Tester()
+                .initialInput("class A {{ if (1 == 1 && |true && false) {} }}")
+                .expectOutput("class A {{ if (1 == 1 && false) {} }}");
+    }
+
+    public void testDeleteMiddleCompleteIfConditionBeforeOperatorWithinMultipleConditions() {
+        new Tester()
+                .initialInput("class A {{ if (1 == 1| && true && false) {} }}")
+                .expectOutput("class A {{ if (1 == 1 && false) {} }}");
+    }
+
+    public void testDeletePartialIfConditionWithinMultipleConditions() {
+        new Tester()
+                .initialInput("class A {{ if (1| == 1 && true) {} }}")
+                .expectOutput("class A {{ if (1 && true) {} }}");
     }
 
     public void testDeleteCompleteStringLiteral() {
@@ -297,32 +459,61 @@ public final class PsiKillTest
                 );
     }
 
-    public void testDeleteCompleteArgumentList() {
+    public void testDeleteFirstParameter() {
         new Tester()
-                .initialInput(
-                        "class Main {",
-                        "  void test(|int a, int b, int c) {}",
-                        "}"
-                )
-                .expectOutput(
-                        "class Main {",
-                        "  void test() {}",
-                        "}"
-                );
+                .initialInput("class A { void test(|int a, int b, int c) {}}")
+                .expectOutput("class A { void test(int b, int c) {}}");
     }
 
-    public void testDeletePartialArgumentList() {
+    public void testDeleteMiddleParameter() {
         new Tester()
-                .initialInput(
-                        "class Main {",
-                        "  void test(int |a, int b, int c) {}",
-                        "}"
-                )
-                .expectOutput(
-                        "class Main {",
-                        "  void test(int ) {}",
-                        "}"
-                );
+                .initialInput("class A { void test(int a, |int b, int c) {}}")
+                .expectOutput("class A { void test(int a, int c) {}}");
+    }
+
+    public void testDeleteLastParameter() {
+        new Tester()
+                .initialInput("class A { void test(int a, int b|, int c) {}}")
+                .expectOutput("class A { void test(int a, int b) {}}");
+        new Tester()
+                .initialInput("class A { void test(int a, int b, |int c) {}}")
+                .expectOutput("class A { void test(int a, int b, ) {}}");
+    }
+
+    public void testDeleteCompleteParameterList() {
+        new Tester()
+                .initialInput("class A { void test|(int a, int b, int c) {}}")
+                .expectOutput("class A { void test {}}");
+    }
+
+    public void testDeleteFirstTypeParameter() {
+        new Tester()
+                .initialInput("class A<|A, B, C> {}")
+                .expectOutput("class A<B, C> {}");
+    }
+
+    public void testDeleteMiddleTypeParameter() {
+        new Tester()
+                .initialInput("class A<A, |B, C> {}")
+                .expectOutput("class A<A, C> {}");
+        new Tester()
+                .initialInput("class A<A|, B, C> {}")
+                .expectOutput("class A<A, C> {}");
+    }
+
+    public void testDeleteLastTypeParameter() {
+        new Tester()
+                .initialInput("class A<A, B|, C> {}")
+                .expectOutput("class A<A, B> {}");
+        new Tester()
+                .initialInput("class A<A, B,| C> {}")
+                .expectOutput("class A<A, B,> {}");
+    }
+
+    public void testDeleteCompleteTypeParameterList() {
+        new Tester()
+                .initialInput("class A|<A, B, C> {}")
+                .expectOutput("class A {}");
     }
 
     public void testArgumentListJustBeforeClosingBracketDoesNothing() {

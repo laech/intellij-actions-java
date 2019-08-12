@@ -7,14 +7,17 @@ import com.intellij.openapi.editor.actions.TextComponentEditorAction;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 
+import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static com.intellij.openapi.actionSystem.CommonDataKeys.PSI_FILE;
 import static com.intellij.openapi.editor.EditorModificationUtil.deleteSelectedTextForAllCarets;
-import static com.intellij.psi.util.PsiTreeUtil.getParentOfType;
 import static java.lang.Character.isSpaceChar;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+import static java.util.Objects.requireNonNull;
 
 public final class PsiKill extends TextComponentEditorAction {
 
@@ -93,49 +96,62 @@ public final class PsiKill extends TextComponentEditorAction {
         while (!(element instanceof PsiStatement)
                 && !(element instanceof PsiModifierListOwner)
                 && !(element instanceof PsiComment)
-                && !(element instanceof PsiPolyadicExpression)
+                && !(element instanceof PsiLiteralExpression)
                 && !(element instanceof PsiArrayInitializerExpression)
                 && !(element instanceof PsiParameterList)
-                && !isStringLiteral(editor, element)) {
+                && !(element instanceof PsiParenthesizedExpression)
+                && !(element instanceof PsiCodeBlock)
+                && !isParentPolyadic(element)
+                && !isParentExpressionList(element)
+                && !isParentTypeParameterList(element)
+                && !isStringLiteral(element)) {
 
-            if (element == null) {
+            if (element == null || element instanceof PsiFile) {
                 selectToLineEnd(editor, caret);
                 return;
             }
+
             element = element.getParent();
-            if (element instanceof PsiFile) {
-                selectToLineEnd(editor, caret);
-                return;
-            }
         }
 
-        if (element instanceof PsiParameter) {
-            selectList(editor, caret, element,
-                    PsiParameterList.class,
-                    PsiParameterList::getParameters
-            );
-
-        } else if (element instanceof PsiTypeParameter) {
-            selectList(editor, caret, element,
-                    PsiTypeParameterList.class,
-                    PsiTypeParameterList::getTypeParameters
-            );
-
-        } else {
-            selectElement(editor, caret, element);
-        }
+        selectElement(editor, caret, element);
     }
 
-    private static boolean isStringLiteral(Editor editor, PsiElement element) {
-        if (!(element instanceof PsiLiteralExpression)) {
-            return false;
-        }
-        TextRange range = element.getTextRange();
-        int endOffset = range.getEndOffset();
-        return endOffset > 0 &&
-                editor.getDocument()
-                        .getImmutableCharSequence()
-                        .charAt(endOffset - 1) == '"';
+    private static boolean isParentTypeParameterList(PsiElement element) {
+        return element != null &&
+                element.getParent() instanceof PsiTypeParameterList;
+    }
+
+    private static boolean isParentExpressionList(PsiElement element) {
+        return element != null &&
+                element.getParent() instanceof PsiExpressionList;
+    }
+
+    private static boolean isParentPolyadic(PsiElement element) {
+        return element != null &&
+                element.getParent() instanceof PsiPolyadicExpression;
+    }
+
+    private static boolean isStringLiteral(PsiElement element) {
+        return element instanceof PsiLiteralValue &&
+                ((PsiLiteralValue) element).getValue() instanceof String;
+    }
+
+    private static boolean isCharLiteral(PsiElement element) {
+        return element instanceof PsiLiteralValue &&
+                ((PsiLiteralValue) element).getValue() instanceof Character;
+    }
+
+    private static boolean isCompleteCodeBlock(PsiElement element) {
+        return element instanceof PsiCodeBlock &&
+                ((PsiCodeBlock) element).getLBrace() != null &&
+                ((PsiCodeBlock) element).getRBrace() != null;
+    }
+
+    private static boolean isCompleteClass(PsiElement element) {
+        return element instanceof PsiClass &&
+                ((PsiClass) element).getLBrace() != null &&
+                ((PsiClass) element).getRBrace() != null;
     }
 
     private static void selectElement(
@@ -144,57 +160,115 @@ public final class PsiKill extends TextComponentEditorAction {
             PsiElement element
     ) {
         Document doc = editor.getDocument();
-        TextRange range = element.getTextRange();
-        int endOffset = range.getEndOffset();
+        TextRange elementTextRange = element.getTextRange();
+        int selectionEndOffset = elementTextRange.getEndOffset();
 
-        if (caret.getOffset() > range.getStartOffset()) {
+        PsiElement parent = element.getParent();
+        if (caret.getOffset() > elementTextRange.getStartOffset()) {
             // If inside pair of quotes/braces etc, kill to just before the
             // end closing char.
-            if (isStringLiteral(editor, element)
+            if (isStringLiteral(element)
+                    || isCharLiteral(element)
                     || element instanceof PsiArrayInitializerExpression
-                    || element instanceof PsiParameterList) {
-                endOffset--;
+                    || element instanceof PsiParameterList
+                    || element instanceof PsiParenthesizedExpression
+                    || isCompleteCodeBlock(element)
+                    || isCaretBetweenClassBraces(caret, element)) {
+                selectionEndOffset--;
             }
+
+        } else if (parent instanceof PsiPolyadicExpression) {
+            // If in polyadic expression (e.g. a && b && c), kill single
+            // element and operator
+            selectionEndOffset =
+                    getNextElementOffset(
+                            ((PsiPolyadicExpression) parent).getOperands(),
+                            element
+                    ).orElse(selectionEndOffset);
+
+        } else if (parent instanceof PsiArrayInitializerExpression) {
+            // If in array, kill single element + separator
+            selectionEndOffset =
+                    getListOrNextElementOffset(
+                            parent,
+                            element,
+                            ((PsiArrayInitializerExpression) parent)::getInitializers
+                    ).orElseGet(() -> parent.getTextRange().getEndOffset() - 1);
+
+        } else {
+            Optional<PsiElement[]> elements = getListElements(parent);
+            selectionEndOffset = elements
+                    .map(es -> getListOrNextElementOffset(
+                            parent,
+                            element,
+                            () -> es
+                    ).orElseGet(() -> parent.getTextRange().getEndOffset() - 1))
+                    .orElse(selectionEndOffset);
         }
 
-        int endLine = doc.getLineNumber(endOffset);
-        int endColumn = endOffset - doc.getLineStartOffset(endLine);
+        int endLine = doc.getLineNumber(selectionEndOffset);
+        int endColumn = selectionEndOffset - doc.getLineStartOffset(endLine);
         caret.setSelection(
                 caret.getVisualPosition(),
                 caret.getOffset(),
                 editor.logicalToVisualPosition(
                         new LogicalPosition(endLine, endColumn)),
-                endOffset
+                selectionEndOffset
         );
     }
 
-    private static <T extends PsiElement> void selectList(
-            Editor editor,
-            Caret caret,
+    private static OptionalInt getListOrNextElementOffset(
+            PsiElement parent,
             PsiElement element,
-            Class<T> parentType,
-            Function<T, PsiElement[]> getParams
+            Supplier<PsiElement[]> getChildren
     ) {
-        Document doc = editor.getDocument();
-        T list = getParentOfType(element, parentType);
-        if (list == null) {
-            return;
+        TextRange elementRange = element.getTextRange();
+        TextRange parentTextRange = parent.getTextRange();
+        return elementRange.getStartOffset() ==
+                parentTextRange.getStartOffset()
+                ? OptionalInt.of(parentTextRange.getEndOffset())
+                : getNextElementOffset(getChildren.get(), element);
+    }
+
+    private static OptionalInt getNextElementOffset(
+            PsiElement[] elements,
+            PsiElement element
+    ) {
+        int index = asList(elements).indexOf(element);
+        OptionalInt offset = index < 0 || index >= elements.length - 1
+                ? OptionalInt.empty()
+                : OptionalInt.of(elements[index + 1]
+                        .getTextRange()
+                        .getStartOffset());
+
+        return offset.isPresent() ? offset : stream(elements)
+                .map(PsiElement::getTextRange)
+                .filter(o -> o.getStartOffset() >=
+                        element.getTextRange().getEndOffset())
+                .mapToInt(TextRange::getEndOffset)
+                .findFirst();
+    }
+
+    private static Optional<PsiElement[]> getListElements(PsiElement parent) {
+        if (parent instanceof PsiExpressionList) {
+            return Optional.of(((PsiExpressionList) parent).getExpressions());
         }
-        PsiElement[] params = getParams.apply(list);
-        if (params.length == 0) {
-            return;
+        if (parent instanceof PsiParameterList) {
+            return Optional.of(((PsiParameterList) parent).getParameters());
         }
-        PsiElement lastParam = params[params.length - 1];
-        int endOffset = lastParam.getTextRange().getEndOffset();
-        int endLine = doc.getLineNumber(endOffset);
-        int endLineColumn = endOffset - doc.getLineStartOffset(endLine);
-        caret.setSelection(
-                caret.getVisualPosition(),
-                caret.getOffset(),
-                editor.logicalToVisualPosition(
-                        new LogicalPosition(endLine, endLineColumn)),
-                endOffset
-        );
+        if (parent instanceof PsiTypeParameterList) {
+            return Optional.of(((PsiTypeParameterList) parent).getTypeParameters());
+        }
+        return Optional.empty();
+    }
+
+    private static boolean isCaretBetweenClassBraces(
+            Caret caret,
+            PsiElement element
+    ) {
+        return isCompleteClass(element) &&
+                requireNonNull(((PsiClass) element).getLBrace()).getTextRange()
+                        .getEndOffset() <= caret.getOffset();
     }
 
     private static boolean isAtEndOfLine(
