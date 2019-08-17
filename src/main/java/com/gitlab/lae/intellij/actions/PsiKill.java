@@ -235,16 +235,17 @@ public final class PsiKill extends TextComponentEditorAction {
             PsiElement element
     ) {
         int index = asList(elements).indexOf(element);
-        OptionalInt offset = index < 0 || index >= elements.length - 1
-                ? OptionalInt.empty()
-                : OptionalInt.of(elements[index + 1]
-                        .getTextRange()
-                        .getStartOffset());
-
-        return offset.isPresent() ? offset : stream(elements)
+        if (index >= 0 && index < elements.length - 1) {
+            return OptionalInt.of(
+                    elements[index + 1]
+                            .getTextRange()
+                            .getStartOffset()
+            );
+        }
+        int elementEndOffset = element.getTextRange().getEndOffset();
+        return stream(elements)
                 .map(PsiElement::getTextRange)
-                .filter(o -> o.getStartOffset() >=
-                        element.getTextRange().getEndOffset())
+                .filter(range -> range.getStartOffset() >= elementEndOffset)
                 .mapToInt(TextRange::getEndOffset)
                 .findFirst();
     }
@@ -267,8 +268,10 @@ public final class PsiKill extends TextComponentEditorAction {
             PsiElement element
     ) {
         return isCompleteClass(element) &&
-                requireNonNull(((PsiClass) element).getLBrace()).getTextRange()
-                        .getEndOffset() <= caret.getOffset();
+                requireNonNull(((PsiClass) element).getLBrace())
+                        .getTextRange()
+                        .getEndOffset()
+                        <= caret.getOffset();
     }
 
     private static boolean isAtEndOfLine(
