@@ -8,6 +8,7 @@
     functionality, you can also assign keyboard shortcuts to them under
     Preferences | Keymap | Plug-ins | Actions.</p>
 
+    <br/>
     Structural editing:
     <ul>
         <li>Kill to Code End: Kill from caret offset to the end of the code block, statement, method etc.</li>
