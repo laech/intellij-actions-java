@@ -2,8 +2,8 @@ plugins {
     id 'org.jetbrains.intellij' version '0.3.5'
 }
 
-group 'com.gitlab.lae.intellij.actions'
-version '0.3.3-SNAPSHOT'
+group 'com.gitlab.lae.intellij.actions.java'
+version '0.4-SNAPSHOT'
 
 repositories {
     mavenCentral()

@@ -1,133 +1,35 @@
 <idea-plugin>
-    <id>com.gitlab.lae.intellij.actions</id>
-    <name>Actions</name>
+    <id>com.gitlab.lae.intellij.actions.java</id>
+    <name>Actions Java</name>
     <version>0</version>
-    <vendor url="https://gitlab.com/lae/intellij-actions">Lae</vendor>
+    <vendor url="https://gitlab.com/lae/intellij-actions-java">Lae</vendor>
     <description><![CDATA[
     <p>You can invoke these actions via IntelliJ's "Find Action" or "Search Everything"
     functionality, you can also assign keyboard shortcuts to them under
     Preferences | Keymap | Plug-ins | Actions.</p>
 
-    Case conversion:
-    <ul>
-        <li>Upcase Region or to Word End</li>
-        <li>Downcase Region or to Word End</li>
-        <li>Capitalize Region or to Word End</li>
-    </ul>
-    Rectangular selection:
-    <ul>
-        <li>Create Rectangle: Create a rectangular selection between the start and end position of the current multiline selection</li>
-    </ul>
     Structural editing:
     <ul>
-        <li>Kill to Code End: Kill from caret offset to the end of the code block, statement, method etc (Java).</li>
-    </ul>
-    Misc:
-    <ul>
-        <li>Use &quot;CamelHumps&quot; Words in Current Editor</li>
-        <li>No Space: Delete spaces and tabs around cursor.</li>
-        <li>One Space: Replace spaces and tabs around cursor with one space.</li>
+        <li>Kill to Code End: Kill from caret offset to the end of the code block, statement, method etc.</li>
     </ul>
     ]]></description>
 
-    <!-- http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html -->
+    <!-- https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html -->
     <idea-version since-build="181"/>
 
-    <!-- http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html -->
-    <depends>com.intellij.modules.platform</depends>
-
-    <change-notes><![CDATA[
-
-    <br/>
-    0.3.2
-    <ul>
-        <li><a href="https://gitlab.com/lae/intellij-actions/issues/10">Kill to Code End: Improve support for structural elements</a></li>
-    </ul>
-
-    <br/>
-    0.3.1
-    <ul>
-        <li><a href="https://gitlab.com/lae/intellij-actions/issues/9">Fix No Space / One Space fail to work if cursor is between white space and non white space char</a></li>
-    </ul>
-
-    <br/>
-    0.3
-    <ul>
-        <li>Add <a href="https://gitlab.com/lae/intellij-actions/issues/8">No Space</a></li>
-        <li>Add <a href="https://gitlab.com/lae/intellij-actions/issues/7">One Space</a></li>
-    </ul>
-
-    <br/>
-    0.2.2
-    <ul>
-        <li><a href="https://gitlab.com/lae/intellij-actions/issues/6">Kill to Code End should just kill line if PSI classes are not installed.</a></li>
-    <ul>
-
-    <br/>
-    0.2.1
-    <ul>
-        <li>Fix Kill to Code End not handling comment/code structure properly.</li>
-    </ul>
-
-    <br/>
-    0.2
-    <ul>
-        <li>Fix Rectangle Create not working properly with multiple cursors.</li>
-        <li>Add Kill to Code End.</li>
-        <li>Add Use &quot;CamelHumps&quot; Words in Current Editor.</li>
-    </ul>
-
-    <br/>
-    0.1.1
-    <ul>
-        <li>Fix Rectangle Create not working properly when editor has folded regions.</li>
-    </ul>
-    ]]>
-    </change-notes>
+    <!-- https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html -->
+    <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
     </extensions>
 
     <actions>
 
-        <action id="com.gitlab.lae.intellij.actions.UpcaseRegionOrToWordEnd"
-                class="com.gitlab.lae.intellij.actions.UpcaseRegionOrToWordEnd"
-                text="Upcase Region or to Word End"
-                description="Converts selection to upper case, if no selection, convert the next word."/>
-
-        <action id="com.gitlab.lae.intellij.actions.DowncaseRegionOrToWordEnd"
-                class="com.gitlab.lae.intellij.actions.DowncaseRegionOrToWordEnd"
-                text="Downcase Region or to Word End"
-                description="Converts selection to lower case, if no selection, convert the next word."/>
-
-        <action id="com.gitlab.lae.intellij.actions.CapitalizeRegionOrToWordEnd"
-                class="com.gitlab.lae.intellij.actions.CapitalizeRegionOrToWordEnd"
-                text="Capitalized Region or to Word End"
-                description="Converts selection to title case, if no selection, convert the next word."/>
-
-        <action id="com.gitlab.lae.intellij.actions.CreateRectangularSelectionFromMultiLineSelection"
-                class="com.gitlab.lae.intellij.actions.RectangleCreate"
-                text="Create Rectangle"
-                description="Create a rectangular selection between the start and end position of the current multiline selection"/>
-
-        <action id="com.gitlab.lae.intellij.actions.PsiKill"
-                class="com.gitlab.lae.intellij.actions.PsiKill"
+        <action id="com.gitlab.lae.intellij.actions.java.KillToCodeEnd"
+                class="com.gitlab.lae.intellij.actions.java.KillToCodeEnd"
                 text="Kill to Code End"
                 description="Kill the code block after cursor, if no code block, kill to line end."/>
 
-        <action class="com.gitlab.lae.intellij.actions.CamelHumpsInCurrentEditor"
-                id="com.gitlab.lae.intellij.actions.CamelHumpsInCurrentEditor"
-                text="Use &quot;CamelHumps&quot; Words in Current Editor"/>
-
-        <action id="com.gitlab.lae.intellij.actions.NoSpace"
-                class="com.gitlab.lae.intellij.actions.NoSpace"
-                text="No Space"
-                description="Delete all spaces and tabs around cursor."/>
-
-        <action id="com.gitlab.lae.intellij.actions.OneSpace"
-                class="com.gitlab.lae.intellij.actions.OneSpace"
-                text="One Space"
-                description="Replace spaces and tabs around cursor with one space."/>
     </actions>
 
 </idea-plugin>

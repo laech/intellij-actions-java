@@ -1,4 +1,4 @@
-package com.gitlab.lae.intellij.actions;
+package com.gitlab.lae.intellij.actions.java;
 
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.editor.CaretState;
@@ -12,7 +12,7 @@ import java.util.List;
 import static com.intellij.openapi.actionSystem.IdeActions.ACTION_EDITOR_PASTE_SIMPLE;
 import static java.util.stream.Collectors.toList;
 
-public final class PsiKillTest
+public final class KillToCodeEndTest
         extends LightPlatformCodeInsightFixtureTestCase {
 
     public void testDeleteBracketContentWithoutDeletingClosingBracket() {
@@ -819,7 +819,7 @@ public final class PsiKillTest
                             .collect(toList()));
 
             myFixture.performEditorAction(
-                    "com.gitlab.lae.intellij.actions.PsiKill");
+                    "com.gitlab.lae.intellij.actions.java.KillToCodeEnd");
             if (pasteAfterKill) {
                 myFixture.performEditorAction(ACTION_EDITOR_PASTE_SIMPLE);
             }

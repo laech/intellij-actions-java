@@ -1,4 +1,4 @@
-package com.gitlab.lae.intellij.actions;
+package com.gitlab.lae.intellij.actions.java;
 
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.editor.*;
@@ -21,11 +21,11 @@ import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
 
-public final class PsiKill extends TextComponentEditorAction {
+public final class KillToCodeEnd extends TextComponentEditorAction {
 
     private static final EndOffsetGetter[] getters = EndOffsetGetter.values();
 
-    public PsiKill() {
+    public KillToCodeEnd() {
         super(new Handler());
     }
 
