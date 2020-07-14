@@ -1,32 +1,40 @@
-plugins {
-    id 'org.jetbrains.intellij' version '0.4.21'
+buildscript {
+  ext.kotlinVersion = "1.3.72"
+  dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+  }
 }
 
-group 'com.gitlab.lae.intellij.actions.java'
-version '0.5-SNAPSHOT'
+plugins {
+  id "org.jetbrains.intellij" version "0.4.21"
+  id "org.jetbrains.kotlin.jvm" version "$kotlinVersion"
+}
+
+group "com.gitlab.lae.intellij.actions.java"
+version "0.5-SNAPSHOT"
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 test {
-    testLogging {
-        exceptionFormat = 'full'
-    }
+  testLogging {
+    exceptionFormat = "full"
+  }
 }
 
-ext.intellijVersion = project.properties['intellijVersion'] ?: '2018.1'
+ext.intellijVersion = project.properties["intellijVersion"] ?: "2018.1"
 
-if (intellijVersion != '2018.1') {
+if (intellijVersion != "2018.1") {
   intellij {
-    plugins 'java'
+    plugins "java"
   }
 }
 
 intellij {
-    version intellijVersion
-    updateSinceUntilBuild = false
+  version intellijVersion
+  updateSinceUntilBuild = false
 }
