@@ -1,9 +1,9 @@
 <idea-plugin>
-    <id>com.gitlab.lae.intellij.actions.java</id>
-    <name>Actions Java</name>
-    <version>0</version>
-    <vendor url="https://gitlab.com/lae/intellij-actions-java">Lae</vendor>
-    <description><![CDATA[
+  <id>com.gitlab.lae.intellij.actions.java</id>
+  <name>Actions Java</name>
+  <version>0</version>
+  <vendor url="https://gitlab.com/lae/intellij-actions-java">Lae</vendor>
+  <description><![CDATA[
     <p>You can invoke these actions via IntelliJ's "Find Action" or "Search Everything"
     functionality, you can also assign keyboard shortcuts to them under
     Preferences | Keymap | Plug-ins | Actions.</p>
@@ -15,22 +15,41 @@
     </ul>
     ]]></description>
 
-    <!-- https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html -->
-    <idea-version since-build="181"/>
+  <change-notes><![CDATA[
 
-    <!-- https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html -->
-    <depends>com.intellij.modules.java</depends>
+    <br/>
+    0.4.1
+    <ul>
+    <li>
+      <a href="https://gitlab.com/lae/intellij-actions-java/-/issues/1">
+        Kill to Code End shouldn't kill entire javadoc.
+      </a>
+    </li>
+    <li>
+      <a href="https://gitlab.com/lae/intellij-actions-java/-/issues/2">
+        Kill to Code End incorrectly kill if statement with negation.
+      </a>
+    </li>
+    </ul>
 
-    <extensions defaultExtensionNs="com.intellij">
-    </extensions>
+  ]]></change-notes>
 
-    <actions>
+  <!-- https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html -->
+  <idea-version since-build="181"/>
 
-        <action id="com.gitlab.lae.intellij.actions.java.KillToCodeEnd"
-                class="com.gitlab.lae.intellij.actions.java.KillToCodeEnd"
-                text="Kill to Code End"
-                description="Kill the code block after cursor, if no code block, kill to line end."/>
+  <!-- https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html -->
+  <depends>com.intellij.modules.java</depends>
 
-    </actions>
+  <extensions defaultExtensionNs="com.intellij">
+  </extensions>
+
+  <actions>
+
+    <action id="com.gitlab.lae.intellij.actions.java.KillToCodeEnd"
+      class="com.gitlab.lae.intellij.actions.java.KillToCodeEnd"
+      text="Kill to Code End"
+      description="Kill the code block after cursor, if no code block, kill to line end."/>
+
+  </actions>
 
 </idea-plugin>
