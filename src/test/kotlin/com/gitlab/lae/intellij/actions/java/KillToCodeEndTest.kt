@@ -248,6 +248,13 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
+  fun testDeleteIfNegation() {
+    test(
+      "class A {{ if (|!true) {} }}",
+      "class A {{ if () {} }}"
+    )
+  }
+
   fun testDeleteCompleteStringLiteral() {
     test(
       "class A { String text = |\"hello world\"; }",

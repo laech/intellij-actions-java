@@ -8,12 +8,9 @@ import com.intellij.openapi.editor.actionSystem.EditorWriteActionHandler
 import com.intellij.openapi.editor.actions.TextComponentEditorAction
 import com.intellij.psi.*
 import java.lang.Character.isSpaceChar
-import java.util.function.BiPredicate
-import java.util.function.ToIntBiFunction
 
-class KillToCodeEnd : TextComponentEditorAction(Handler()) {
-
-  private class Handler : EditorWriteActionHandler(false) {
+class KillToCodeEnd :
+  TextComponentEditorAction(object : EditorWriteActionHandler(false) {
     override fun executeWriteAction(
       editor: Editor,
       caret: Caret?,
@@ -23,8 +20,7 @@ class KillToCodeEnd : TextComponentEditorAction(Handler()) {
       EditorCopyPasteHelper.getInstance().copySelectionToClipboard(editor)
       deleteSelectedTextForAllCarets(editor)
     }
-  }
-}
+  })
 
 private val getters = EndOffsetGetter.values()
 
@@ -71,7 +67,7 @@ private fun select(editor: Editor, caret: Caret, file: PsiFile) {
       continue
     }
 
-    val endOffset = getter.applyAsInt(element, caret)
+    val endOffset = getter.endOffset(element, caret)
     val endLine = doc.getLineNumber(endOffset)
     val endColumn = endOffset - doc.getLineStartOffset(endLine)
     caret.setSelection(
@@ -85,7 +81,7 @@ private fun select(editor: Editor, caret: Caret, file: PsiFile) {
 }
 
 private fun getter(element: PsiElement, caret: Caret): EndOffsetGetter? =
-  getters.firstOrNull { getter -> getter.test(element, caret) }
+  getters.firstOrNull { getter -> getter.recognizes(element, caret) }
 
 private fun getListOrNextElementOffset(
   parent: PsiElement,
@@ -162,13 +158,11 @@ private fun selectToNextLineStart(editor: Editor, caret: Caret) {
   )
 }
 
-private enum class EndOffsetGetter :
-  BiPredicate<PsiElement, Caret>,
-  ToIntBiFunction<PsiElement, Caret> {
+private enum class EndOffsetGetter {
 
   ENCLOSURE_PARENT {
 
-    override fun test(element: PsiElement, caret: Caret) =
+    override fun recognizes(element: PsiElement, caret: Caret) =
       (element is PsiParenthesizedExpression
         || element is PsiArrayInitializerExpression
         || element is PsiParameterList
@@ -178,7 +172,7 @@ private enum class EndOffsetGetter :
         || isCompleteCodeBlock(element)
         || isCaretBetweenClassBraces(caret, element))
 
-    override fun applyAsInt(element: PsiElement, caret: Caret) =
+    override fun endOffset(element: PsiElement, caret: Caret) =
       element.textRange.endOffset -
         if (caret.offset > element.textRange.startOffset) 1 else 0
 
@@ -207,10 +201,10 @@ private enum class EndOffsetGetter :
 
   POLYADIC_CHILD {
 
-    override fun test(element: PsiElement, caret: Caret) =
+    override fun recognizes(element: PsiElement, caret: Caret) =
       element.parent is PsiPolyadicExpression
 
-    override fun applyAsInt(element: PsiElement, caret: Caret): Int {
+    override fun endOffset(element: PsiElement, caret: Caret): Int {
       val parent = element.parent as PsiPolyadicExpression
       return getNextElementOffset(parent.operands, element)
         ?: element.textRange.endOffset
@@ -219,10 +213,10 @@ private enum class EndOffsetGetter :
 
   ARRAY_INITIALIZER_CHILD {
 
-    override fun test(element: PsiElement, caret: Caret) =
+    override fun recognizes(element: PsiElement, caret: Caret) =
       element.parent is PsiArrayInitializerExpression
 
-    override fun applyAsInt(element: PsiElement, caret: Caret): Int {
+    override fun endOffset(element: PsiElement, caret: Caret): Int {
       val parent = element.parent as PsiArrayInitializerExpression
       return getListOrNextElementOffset(parent, element) { parent.initializers }
         ?: parent.textRange.endOffset - 1
@@ -231,10 +225,10 @@ private enum class EndOffsetGetter :
 
   ENCLOSURE_CHILD {
 
-    override fun test(element: PsiElement, caret: Caret) =
+    override fun recognizes(element: PsiElement, caret: Caret) =
       getChildren(element.parent) != null
 
-    override fun applyAsInt(element: PsiElement, caret: Caret): Int {
+    override fun endOffset(element: PsiElement, caret: Caret): Int {
       val parent = element.parent
       val children = getChildren(parent) ?: return element.textRange.endOffset
       return getListOrNextElementOffset(parent, element) { children }
@@ -252,13 +246,17 @@ private enum class EndOffsetGetter :
 
   GENERAL {
 
-    override fun test(element: PsiElement, caret: Caret) =
+    override fun recognizes(element: PsiElement, caret: Caret) =
       (element is PsiStatement
         || element is PsiModifierListOwner
         || element is PsiComment
-        || element is PsiLiteralExpression)
+        || element is PsiLiteralExpression
+        || element is PsiUnaryExpression)
 
-    override fun applyAsInt(element: PsiElement, caret: Caret) =
+    override fun endOffset(element: PsiElement, caret: Caret) =
       element.textRange.endOffset
-  }
+  };
+
+  abstract fun recognizes(element: PsiElement, caret: Caret): Boolean
+  abstract fun endOffset(element: PsiElement, caret: Caret): Int
 }
