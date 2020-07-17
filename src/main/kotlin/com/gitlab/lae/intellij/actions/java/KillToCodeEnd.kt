@@ -7,6 +7,8 @@ import com.intellij.openapi.editor.EditorModificationUtil.deleteSelectedTextForA
 import com.intellij.openapi.editor.actionSystem.EditorWriteActionHandler
 import com.intellij.openapi.editor.actions.TextComponentEditorAction
 import com.intellij.psi.*
+import com.intellij.psi.javadoc.PsiDocComment
+import com.intellij.psi.javadoc.PsiDocTag
 import java.lang.Character.isSpaceChar
 
 class KillToCodeEnd :
@@ -249,7 +251,8 @@ private enum class EndOffsetGetter {
     override fun recognizes(element: PsiElement, caret: Caret) =
       (element is PsiStatement
         || element is PsiModifierListOwner
-        || element is PsiComment
+        || element is PsiDocTag
+        || (element is PsiComment && element !is PsiDocComment)
         || element is PsiLiteralExpression
         || element is PsiUnaryExpression)
 

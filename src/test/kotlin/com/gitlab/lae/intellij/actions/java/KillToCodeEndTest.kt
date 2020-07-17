@@ -321,6 +321,45 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
+  fun testDeleteJavadocDescriptionToLineEnd() {
+    test(
+      """
+      /**
+       * Hello| world,
+       * <p>
+       * how are you?
+       */
+      """,
+      """
+      /**
+       * Hello
+       * <p>
+       * how are you?
+       */
+      """
+    )
+  }
+
+  fun testDeleteJavadocEntireTag() {
+    test(
+      """
+      /**
+       * Hello world.
+       * <p>
+       *| @return how
+       *         are you
+       */
+      """,
+      """
+      /**
+       * Hello world.
+       * <p>
+       *
+       */
+      """
+    )
+  }
+
   fun testDeleteMixedTabsAndSpaces() {
     test(
       """
