@@ -991,6 +991,20 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
+  @Test
+  fun `delete annotation attribute`() {
+    test(
+      """
+      @MyAnnotation(|String.class)
+      class Main {}
+      """,
+      """
+      @MyAnnotation()
+      class Main {}
+      """
+    )
+  }
+
   private fun test(
     input: String,
     output: String,

@@ -254,6 +254,7 @@ private enum class EndOffsetGetter {
         || element is PsiDocTag
         || (element is PsiComment && element !is PsiDocComment)
         || element is PsiLiteralExpression
+        || element is PsiNameValuePair
         || element is PsiUnaryExpression)
 
     override fun endOffset(element: PsiElement, caret: Caret) =

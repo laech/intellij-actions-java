@@ -16,23 +16,31 @@
     ]]></description>
 
   <change-notes><![CDATA[
+    <br/>
+    0.4.2
+    <ul>
+      <li>
+        <a href="https://gitlab.com/lae/intellij-actions-java/-/issues/3">
+          Kill to code end incorrectly handles values in annotations.
+        </a>
+      </li>
+    </ul>
 
     <br/>
     0.4.1
     <ul>
-    <li>
-      <a href="https://gitlab.com/lae/intellij-actions-java/-/issues/1">
-        Kill to Code End shouldn't kill entire javadoc.
-      </a>
-    </li>
-    <li>
-      <a href="https://gitlab.com/lae/intellij-actions-java/-/issues/2">
-        Kill to Code End incorrectly kill if statement with negation.
-      </a>
-    </li>
+      <li>
+        <a href="https://gitlab.com/lae/intellij-actions-java/-/issues/1">
+          Kill to Code End shouldn't kill entire javadoc.
+        </a>
+      </li>
+      <li>
+        <a href="https://gitlab.com/lae/intellij-actions-java/-/issues/2">
+          Kill to Code End incorrectly kill if statement with negation.
+        </a>
+      </li>
     </ul>
-
-  ]]></change-notes>
+    ]]></change-notes>
 
   <!-- https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html -->
   <idea-version since-build="181"/>
