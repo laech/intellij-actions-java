@@ -2,34 +2,55 @@ package com.gitlab.lae.intellij.actions.java
 
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.actionSystem.IdeActions.ACTION_EDITOR_PASTE_SIMPLE
+import com.intellij.openapi.application.ApplicationManager.getApplication
 import com.intellij.openapi.editor.CaretState
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 
+@RunWith(JUnit4::class)
 class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
 
-  fun `test delete bracket content without deleting closing bracket`() {
+  @Before
+  public override fun setUp() {
+    super.setUp()
+  }
+
+  @After
+  public override fun tearDown() {
+    super.tearDown()
+  }
+
+  @Test
+  fun `delete bracket content without deleting closing bracket`() {
     test(
       "class A { int i = (1| - 1); }",
       "class A { int i = (1); }"
     )
   }
 
-  fun `test delete at end bracket does nothing`() {
+  @Test
+  fun `delete at end bracket does nothing`() {
     test(
       "class A { int i = (1|); }",
       "class A { int i = (1); }"
     )
   }
 
-  fun `test delete at start bracket of expression deletes whole expression`() {
+  @Test
+  fun `delete at start bracket of expression deletes whole expression`() {
     test(
       "class A { int i = |(1); }",
       "class A { int i = ; }"
     )
   }
 
-  fun `test delete char`() {
+  @Test
+  fun `delete char`() {
     test(
       "class A { char a = '|a'; }",
       "class A { char a = ''; }"
@@ -40,14 +61,16 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete complete class body`() {
+  @Test
+  fun `delete complete class body`() {
     test(
       "class A |{}",
       "class A "
     )
   }
 
-  fun `test delete just before closing brace in class does nothing`() {
+  @Test
+  fun `delete just before closing brace in class does nothing`() {
     test(
       "class A {|}",
       "class A {}"
@@ -58,35 +81,40 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete just before closing brace in method does nothing`() {
+  @Test
+  fun `delete just before closing brace in method does nothing`() {
     test(
       "class A { void bob() {|} }",
       "class A { void bob() {} }"
     )
   }
 
-  fun `test delete just before closing brace in initializer does nothing`() {
+  @Test
+  fun `delete just before closing brace in initializer does nothing`() {
     test(
       "class A {{|}}",
       "class A {{}}"
     )
   }
 
-  fun `test delete just before closing brace in static initializer does nothing`() {
+  @Test
+  fun `delete just before closing brace in static initializer does nothing`() {
     test(
       "class A { static {|} }",
       "class A { static {} }"
     )
   }
 
-  fun `test delete just before closing brace in statement does nothing`() {
+  @Test
+  fun `delete just before closing brace in statement does nothing`() {
     test(
       "class A { void bob() { {|} } }",
       "class A { void bob() { {} } }"
     )
   }
 
-  fun `test delete first method invocation parameter`() {
+  @Test
+  fun `delete first method invocation parameter`() {
     test(
       "class A {{ bob(|1, 2, 3); }}",
       "class A {{ bob(2, 3); }}"
@@ -101,7 +129,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete middle method invocation parameter`() {
+  @Test
+  fun `delete middle method invocation parameter`() {
     test(
       "class A {{ bob(1, |2, 3); }}",
       "class A {{ bob(1, 3); }}"
@@ -116,7 +145,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete last method invocation parameter`() {
+  @Test
+  fun `delete last method invocation parameter`() {
     test(
       "class A {{ bob(1, 2|, 3); }}",
       "class A {{ bob(1, 2); }}"
@@ -135,14 +165,16 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete complete method invocation parameter list`() {
+  @Test
+  fun `delete complete method invocation parameter list`() {
     test(
       "class A {{ bob|(1, 2, 3); }}",
       "class A {{ bob; }}"
     )
   }
 
-  fun `test delete method invocation just before closing does nothing`() {
+  @Test
+  fun `delete method invocation just before closing does nothing`() {
     test(
       "class A {{ bob(|); }}",
       "class A {{ bob(); }}"
@@ -153,42 +185,48 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete method invocation whitespace`() {
+  @Test
+  fun `delete method invocation whitespace`() {
     test(
       "class A {{ bob(| ); }}",
       "class A {{ bob(); }}"
     )
   }
 
-  fun `test delete first array initialization element`() {
+  @Test
+  fun `delete first array initialization element`() {
     test(
       "class A { int[] arr = {|1, 2, 3}; }",
       "class A { int[] arr = {2, 3}; }"
     )
   }
 
-  fun `test delete middle array initialization`() {
+  @Test
+  fun `delete middle array initialization`() {
     test(
       "class A { int[] arr = {1, |2, 3}; }",
       "class A { int[] arr = {1, 3}; }"
     )
   }
 
-  fun `test delete last array initialization`() {
+  @Test
+  fun `delete last array initialization`() {
     test(
       "class A { int[] arr = {1, 2 |, 3}; }",
       "class A { int[] arr = {1, 2 }; }"
     )
   }
 
-  fun `test delete complete array initialization`() {
+  @Test
+  fun `delete complete array initialization`() {
     test(
       "class A { int[] arr = |{1, 2, 3}; }",
       "class A { int[] arr = ; }"
     )
   }
 
-  fun `test delete array initialization just before closing does nothing`() {
+  @Test
+  fun `delete array initialization just before closing does nothing`() {
     test(
       "class A { int[] arr = {|}; }",
       "class A { int[] arr = {}; }"
@@ -199,84 +237,96 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete complete if condition`() {
+  @Test
+  fun `delete complete if condition`() {
     test(
       "class A {{ if (|true) {} }}",
       "class A {{ if () {} }}"
     )
   }
 
-  fun `test delete partial if condition`() {
+  @Test
+  fun `delete partial if condition`() {
     test(
       "class A {{ if (1| == 1) {} }}",
       "class A {{ if (1) {} }}"
     )
   }
 
-  fun `test delete first complete if condition within multiple conditions`() {
+  @Test
+  fun `delete first complete if condition within multiple conditions`() {
     test(
       "class A {{ if (|1 == 1 && true) {} }}",
       "class A {{ if (1 && true) {} }}"
     )
   }
 
-  fun `test delete last complete if condition within multiple conditions`() {
+  @Test
+  fun `delete last complete if condition within multiple conditions`() {
     test(
       "class A {{ if (1 == 1| && true) {} }}",
       "class A {{ if (1 == 1) {} }}"
     )
   }
 
-  fun `test delete middle complete if condition after operator within multiple conditions`() {
+  @Test
+  fun `delete middle complete if condition after operator within multiple conditions`() {
     test(
       "class A {{ if (1 == 1 && |true && false) {} }}",
       "class A {{ if (1 == 1 && false) {} }}"
     )
   }
 
-  fun `test delete middle complete if condition before operator within multiple conditions`() {
+  @Test
+  fun `delete middle complete if condition before operator within multiple conditions`() {
     test(
       "class A {{ if (1 == 1| && true && false) {} }}",
       "class A {{ if (1 == 1 && false) {} }}"
     )
   }
 
-  fun `test delete partial if condition within multiple conditions`() {
+  @Test
+  fun `delete partial if condition within multiple conditions`() {
     test(
       "class A {{ if (1| == 1 && true) {} }}",
       "class A {{ if (1 && true) {} }}"
     )
   }
 
-  fun `test delete if negation`() {
+  @Test
+  fun `delete if negation`() {
     test(
       "class A {{ if (|!true) {} }}",
       "class A {{ if () {} }}"
     )
   }
 
-  fun `test delete complete string literal`() {
+  @Test
+  fun `delete complete string literal`() {
     test(
       "class A { String text = |\"hello world\"; }",
       "class A { String text = ; }"
     )
   }
 
-  fun `test delete partial string literal`() {
+  @Test
+  fun `delete partial string literal`() {
     test(
       "class A { String text = \"he|llo world\"; }",
       "class A { String text = \"he\"; }"
     )
   }
 
-  fun `test delete string literal from start`() {
+  @Test
+  fun `delete string literal from start`() {
     test(
       "class A { String text = \"|hello world\"; }",
       "class A { String text = \"\"; }"
     )
   }
 
-  fun `test delete string just before end quote does nothing`() {
+  @Test
+  fun `delete string just before end quote does nothing`() {
     test(
       "class A { String text = \"|\"; }",
       "class A { String text = \"\"; }"
@@ -287,7 +337,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete single line comment from line start will delete whole line comment`() {
+  @Test
+  fun `delete single line comment from line start will delete whole line comment`() {
     test(
       """
       class Main {
@@ -304,7 +355,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete single line comment from middle will delete rest of the line`() {
+  @Test
+  fun `delete single line comment from middle will delete rest of the line`() {
     test(
       """
       class Main {
@@ -321,7 +373,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete javadoc description to line end`() {
+  @Test
+  fun `delete javadoc description to line end`() {
     test(
       """
       /**
@@ -340,7 +393,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete javadoc entire tag`() {
+  @Test
+  fun `delete javadoc entire tag`() {
     test(
       """
       /**
@@ -360,7 +414,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete mixed tabs and spaces`() {
+  @Test
+  fun `delete mixed tabs and spaces`() {
     test(
       """
       class Main {
@@ -388,7 +443,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete complete statement`() {
+  @Test
+  fun `delete complete statement`() {
     test(
       """
       class Main {
@@ -411,7 +467,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete partial statement`() {
+  @Test
+  fun `delete partial statement`() {
     test(
       """
       class Main {
@@ -434,7 +491,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete complete try catch`() {
+  @Test
+  fun `delete complete try catch`() {
     test(
       """
       class Main {
@@ -456,7 +514,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete partial try catch`() {
+  @Test
+  fun `delete partial try catch`() {
     test(
       """
       class Main {
@@ -478,7 +537,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete complete return statement`() {
+  @Test
+  fun `delete complete return statement`() {
     test(
       """
       class Main {
@@ -498,7 +558,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete partial return statement`() {
+  @Test
+  fun `delete partial return statement`() {
     test(
       """
       class Main {
@@ -518,7 +579,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete complete method`() {
+  @Test
+  fun `delete complete method`() {
     test(
       """
       class Main {
@@ -535,7 +597,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete partial method`() {
+  @Test
+  fun `delete partial method`() {
     test(
       """
       class Main {
@@ -553,21 +616,24 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete first parameter`() {
+  @Test
+  fun `delete first parameter`() {
     test(
       "class A { void test(|int a, int b, int c) {}}",
       "class A { void test(int b, int c) {}}"
     )
   }
 
-  fun `test delete middle parameter`() {
+  @Test
+  fun `delete middle parameter`() {
     test(
       "class A { void test(int a, |int b, int c) {}}",
       "class A { void test(int a, int c) {}}"
     )
   }
 
-  fun `test delete last parameter`() {
+  @Test
+  fun `delete last parameter`() {
     test(
       "class A { void test(int a, int b|, int c) {}}",
       "class A { void test(int a, int b) {}}"
@@ -578,21 +644,24 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete complete parameter list`() {
+  @Test
+  fun `delete complete parameter list`() {
     test(
       "class A { void test|(int a, int b, int c) {}}",
       "class A { void test {}}"
     )
   }
 
-  fun `test delete first type parameter`() {
+  @Test
+  fun `delete first type parameter`() {
     test(
       "class A<|A, B, C> {}",
       "class A<B, C> {}"
     )
   }
 
-  fun `test delete middle type parameter`() {
+  @Test
+  fun `delete middle type parameter`() {
     test(
       "class A<A, |B, C> {}",
       "class A<A, C> {}"
@@ -603,7 +672,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete last type parameter`() {
+  @Test
+  fun `delete last type parameter`() {
     test(
       "class A<A, B|, C> {}",
       "class A<A, B> {}"
@@ -614,14 +684,16 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete complete type parameter list`() {
+  @Test
+  fun `delete complete type parameter list`() {
     test(
       "class A|<A, B, C> {}",
       "class A {}"
     )
   }
 
-  fun `test argument list just before closing bracket does nothing`() {
+  @Test
+  fun `argument list just before closing bracket does nothing`() {
     test(
       "class A { void test(int i|) {} }",
       "class A { void test(int i) {} }"
@@ -644,7 +716,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete complete constructor`() {
+  @Test
+  fun `delete complete constructor`() {
     test(
       """
       class Main {
@@ -663,7 +736,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete partial constructor`() {
+  @Test
+  fun `delete partial constructor`() {
     test(
       """
       class Main {
@@ -682,7 +756,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete complete initializer`() {
+  @Test
+  fun `delete complete initializer`() {
     test(
       """
       class Main {
@@ -701,7 +776,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete partial initializer`() {
+  @Test
+  fun `delete partial initializer`() {
     test(
       """
       class Main {
@@ -720,7 +796,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete complete field`() {
+  @Test
+  fun `delete complete field`() {
     test(
       """
       class Main {
@@ -736,7 +813,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete partial field`() {
+  @Test
+  fun `delete partial field`() {
     test(
       """
       class Main {
@@ -752,7 +830,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete complete inner class`() {
+  @Test
+  fun `delete complete inner class`() {
     test(
       """
       class Main {
@@ -769,7 +848,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete partial inner class`() {
+  @Test
+  fun `delete partial inner class`() {
     test(
       """
       class Main {
@@ -786,7 +866,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete complete class`() {
+  @Test
+  fun `delete complete class`() {
     test(
       """
       |class Main {
@@ -797,7 +878,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete partial class`() {
+  @Test
+  fun `delete partial class`() {
     test(
       """
       class Ma|in {
@@ -808,7 +890,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete empty line`() {
+  @Test
+  fun `delete empty line`() {
     test(
       """
       class Main {
@@ -824,7 +907,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test delete text end does nothing`() {
+  @Test
+  fun `delete text end does nothing`() {
     test(
       """
       class Main {
@@ -839,7 +923,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test multiple cursors`() {
+  @Test
+  fun `multiple cursors`() {
     test(
       """
       class Main {
@@ -860,7 +945,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test paste whats been killed will get back original text`() {
+  @Test
+  fun `paste whats been killed will get back original text`() {
     test(
       """
       class Main {
@@ -880,7 +966,8 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-  fun `test paste whats been killed with multiple cursors will get back original text`() {
+  @Test
+  fun `paste whats been killed with multiple cursors will get back original text`() {
     test(
       """
       class Main {
@@ -910,11 +997,13 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     pasteAfterKill: Boolean = false
   ) {
     val (initialText, initialCarets) = init(input)
-    action(initialText, initialCarets)
-    if (pasteAfterKill) {
-      myFixture.performEditorAction(ACTION_EDITOR_PASTE_SIMPLE)
+    getApplication().invokeAndWait {
+      action(initialText, initialCarets)
+      if (pasteAfterKill) {
+        myFixture.performEditorAction(ACTION_EDITOR_PASTE_SIMPLE)
+      }
+      assertEquals(output.trimIndent(), myFixture.editor.document.text)
     }
-    assertEquals(output.trimIndent(), myFixture.editor.document.text)
   }
 
   private fun action(
