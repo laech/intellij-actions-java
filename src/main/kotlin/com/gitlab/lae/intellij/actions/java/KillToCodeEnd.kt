@@ -216,13 +216,14 @@ private enum class EndOffsetGetter {
   ARRAY_INITIALIZER_CHILD {
 
     override fun recognizes(element: PsiElement, caret: Caret) =
-      element.parent is PsiArrayInitializerExpression
+      element.parent is PsiArrayInitializerExpression ||
+        element.parent is PsiArrayInitializerMemberValue
 
-    override fun endOffset(element: PsiElement, caret: Caret): Int {
-      val parent = element.parent as PsiArrayInitializerExpression
-      return getListOrNextElementOffset(parent, element) { parent.initializers }
-        ?: parent.textRange.endOffset - 1
-    }
+    override fun endOffset(element: PsiElement, caret: Caret): Int =
+      getListOrNextElementOffset(element.parent, element) {
+        (element.parent as? PsiArrayInitializerExpression)?.initializers
+          ?: (element.parent as PsiArrayInitializerMemberValue).initializers
+      } ?: element.parent.textRange.endOffset - 1
   },
 
   ENCLOSURE_CHILD {

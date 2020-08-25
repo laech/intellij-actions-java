@@ -1005,6 +1005,35 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
+  @Test
+  fun `delete annotation array middle element`() {
+    test(
+      """
+      @MyAnnotation({"hello"|, "world", "!"})
+      class Example {}
+      """,
+      """
+      @MyAnnotation({"hello", "!"})
+      class Example {}
+      """
+    )
+  }
+
+
+  @Test
+  fun `delete annotation array end element`() {
+    test(
+      """
+      @MyAnnotation({"hello"|, "world"})
+      class Example {}
+      """,
+      """
+      @MyAnnotation({"hello"})
+      class Example {}
+      """
+    )
+  }
+
   private fun test(
     input: String,
     output: String,
