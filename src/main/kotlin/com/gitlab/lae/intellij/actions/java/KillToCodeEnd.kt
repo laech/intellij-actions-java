@@ -243,6 +243,7 @@ private enum class EndOffsetGetter {
         is PsiParameterList -> parent.parameters
         is PsiExpressionList -> parent.expressions
         is PsiTypeParameterList -> parent.typeParameters
+        is PsiAnnotationParameterList -> parent.attributes
         else -> null
       }
   },

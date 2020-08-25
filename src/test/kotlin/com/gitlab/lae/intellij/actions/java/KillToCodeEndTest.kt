@@ -1019,7 +1019,6 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
     )
   }
 
-
   @Test
   fun `delete annotation array end element`() {
     test(
@@ -1030,6 +1029,20 @@ class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
       """
       @MyAnnotation({"hello"})
       class Example {}
+      """
+    )
+  }
+
+  @Test
+  fun `delete annotation parameter`() {
+    test(
+      """
+      @Hello(value = "hi"|, content = "world")
+      public class Example {}
+      """,
+      """
+      @Hello(value = "hi")
+      public class Example {}
       """
     )
   }
