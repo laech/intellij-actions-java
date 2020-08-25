@@ -17,6 +17,21 @@
 
   <change-notes><![CDATA[
     <br/>
+    0.4.3
+    <ul>
+      <li>
+        <a href="https://gitlab.com/lae/intellij-actions-java/-/issues/4">
+          Kill to code end incorrectly handles arrays in annotations.
+        </a>
+      </li>
+      <li>
+        <a href="https://gitlab.com/lae/intellij-actions-java/-/issues/5">
+          Kill to code end incorrectly handles parameters in annotations
+        </a>
+      </li>
+    </ul>
+
+    <br/>
     0.4.2
     <ul>
       <li>
