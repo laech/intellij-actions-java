@@ -60,9 +60,6 @@
   <!-- https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html -->
   <idea-version since-build="181"/>
 
-  <!-- https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html -->
-  <depends>com.intellij.modules.java</depends>
-
   <extensions defaultExtensionNs="com.intellij">
   </extensions>
 

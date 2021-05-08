@@ -5,25 +5,13 @@ import com.intellij.openapi.actionSystem.IdeActions.ACTION_EDITOR_PASTE_SIMPLE
 import com.intellij.openapi.application.ApplicationManager.getApplication
 import com.intellij.openapi.editor.CaretState
 import com.intellij.openapi.editor.LogicalPosition
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase
-import org.junit.After
-import org.junit.Before
+import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 
 @RunWith(JUnit4::class)
-class KillToCodeEndTest : LightPlatformCodeInsightFixtureTestCase() {
-
-  @Before
-  public override fun setUp() {
-    super.setUp()
-  }
-
-  @After
-  public override fun tearDown() {
-    super.tearDown()
-  }
+class KillToCodeEndTest : BasePlatformTestCase() {
 
   @Test
   fun `delete bracket content without deleting closing bracket`() {
